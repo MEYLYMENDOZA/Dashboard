@@ -10,54 +10,54 @@
 
   <style>
     /* ==========================================================================
-       VARIABLES DE TEMA (DARK / LIGHT) Y COLORES VIBRANTES DE DASHBOARD
+       VARIABLES DE TEMA EDITORIAL / CARTOGRÁFICO (CLARO POR DEFECTO / OSCURO SOBRIO)
        ========================================================================== */
     :root {
-      --bg-main: #090d16;
-      --bg-secondary: #111827;
-      --bg-card: rgba(17, 24, 39, 0.78);
-      --bg-card-hover: rgba(30, 41, 59, 0.88);
-      --bg-glass: rgba(15, 23, 42, 0.65);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --border-glow: rgba(16, 185, 129, 0.35);
+      --bg-main: #f4f6f8;
+      --bg-secondary: #e9edf2;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --bg-glass: #ffffff;
+      --text-primary: #18202c;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --border-color: #dce2ea;
+      --border-glow: #94a3b8;
 
-      /* Paleta de indicadores con gradiente y versión viva */
-      --c-veg: #10b981;
-      --c-veg-dark: #059669;
-      --c-veg-glow: rgba(16, 185, 129, 0.25);
+      /* Paleta cartográfica desaturada */
+      --c-veg: #2d6a4f;
+      --c-veg-dark: #1b4332;
+      --c-veg-glow: rgba(45, 106, 79, 0.12);
 
-      --c-vias: #64748b;
-      --c-vias-dark: #475569;
-      --c-vias-glow: rgba(100, 116, 139, 0.25);
+      --c-vias: #5c677d;
+      --c-vias-dark: #334155;
+      --c-vias-glow: rgba(92, 103, 125, 0.12);
 
-      --c-urb: #ef4444;
-      --c-urb-dark: #b91c1c;
-      --c-urb-glow: rgba(239, 68, 68, 0.25);
+      --c-urb: #b5483a;
+      --c-urb-dark: #8c3227;
+      --c-urb-glow: rgba(181, 72, 58, 0.12);
 
-      --c-suelo: #f59e0b;
-      --c-suelo-dark: #d97706;
-      --c-suelo-glow: rgba(245, 158, 11, 0.25);
+      --c-suelo: #c88a2b;
+      --c-suelo-dark: #9c6819;
+      --c-suelo-glow: rgba(200, 138, 43, 0.12);
 
-      --accent-cyan: #06b6d4;
-      --accent-indigo: #6366f1;
-      --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --accent-cyan: #2b6cb0;
+      --accent-indigo: #3b5998;
+      --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
     }
 
-    body.light-theme {
-      --bg-main: #f1f5f9;
-      --bg-secondary: #e2e8f0;
-      --bg-card: rgba(255, 255, 255, 0.92);
-      --bg-card-hover: #ffffff;
-      --bg-glass: rgba(248, 250, 252, 0.85);
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      --border-color: rgba(15, 23, 42, 0.09);
-      --border-glow: rgba(16, 185, 129, 0.45);
-      --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.07);
+    body.dark-theme {
+      --bg-main: #12161f;
+      --bg-secondary: #1b2230;
+      --bg-card: #171c26;
+      --bg-card-hover: #1f2634;
+      --bg-glass: #171c26;
+      --text-primary: #edf2f7;
+      --text-secondary: #a0aec0;
+      --text-muted: #718096;
+      --border-color: #2b3545;
+      --border-glow: #4a5568;
+      --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
     }
 
     * {
@@ -69,16 +69,11 @@
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-main);
-      background-image:
-        radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.10) 0px, transparent 45%),
-        radial-gradient(at 90% 15%, rgba(99, 102, 241, 0.10) 0px, transparent 45%),
-        radial-gradient(at 50% 90%, rgba(239, 68, 68, 0.07) 0px, transparent 50%);
-      background-attachment: fixed;
       color: var(--text-primary);
       line-height: 1.45;
       font-size: 14px;
       overflow-x: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .num {
@@ -86,12 +81,12 @@
     }
 
     /* ==========================================================================
-       ANIMACIONES DE ENTRADA Y PULSO
+       ANIMACIONES SUTILES DE ENTRADA
        ========================================================================== */
     @keyframes fadeSlideUp {
       from {
         opacity: 0;
-        transform: translateY(18px);
+        transform: translateY(8px);
       }
       to {
         opacity: 1;
@@ -99,40 +94,24 @@
       }
     }
 
-    @keyframes pulseGlow {
-      0%, 100% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
-      }
-      50% {
-        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-      }
-    }
-
-    @keyframes shimmerBar {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
     .anim-card {
-      animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: fadeSlideUp 0.35s ease-out both;
     }
-    .delay-1 { animation-delay: 0.06s; }
-    .delay-2 { animation-delay: 0.12s; }
-    .delay-3 { animation-delay: 0.18s; }
-    .delay-4 { animation-delay: 0.24s; }
+    .delay-1 { animation-delay: 0.03s; }
+    .delay-2 { animation-delay: 0.06s; }
+    .delay-3 { animation-delay: 0.09s; }
+    .delay-4 { animation-delay: 0.12s; }
 
     /* ==========================================================================
-       BARRA SUPERIOR (TOPBAR) CON GLASSMORPHISM
+       BARRA SUPERIOR (TOPBAR) LIMPIA
        ========================================================================== */
     .topbar {
       position: sticky;
       top: 0;
       z-index: 100;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       background: var(--bg-glass);
       border-bottom: 1px solid var(--border-color);
-      padding: 0.85rem 1.75rem;
+      padding: 0.75rem 1.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -143,39 +122,30 @@
     .brand-area {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.75rem;
     }
 
     .brand-logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background: #2d6a4f;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      font-size: 1.2rem;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      font-size: 1.05rem;
     }
 
     .live-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      margin-right: 6px;
-      animation: pulseGlow 2s infinite;
+      display: none;
     }
 
     .brand-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      background: linear-gradient(90deg, var(--text-primary), #10b981);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
     }
 
     .brand-subtitle {
@@ -188,7 +158,7 @@
     .topbar-controls {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.55rem;
       flex-wrap: wrap;
     }
 
@@ -201,36 +171,35 @@
 
     .search-box i {
       position: absolute;
-      left: 11px;
+      left: 10px;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
 
     .search-input {
-      background: var(--bg-card);
+      background: var(--bg-main);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 0.45rem 0.8rem 0.45rem 2rem;
-      border-radius: 8px;
+      padding: 0.42rem 0.75rem 0.42rem 1.9rem;
+      border-radius: 6px;
       font-size: 0.8rem;
       font-family: inherit;
       width: 200px;
-      transition: all 0.2s ease;
+      transition: border-color 0.15s ease, width 0.15s ease;
     }
 
     .search-input:focus {
       outline: none;
-      border-color: #10b981;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-      width: 240px;
+      border-color: #2d6a4f;
+      width: 225px;
     }
 
     .btn-action {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 0.45rem 0.85rem;
-      border-radius: 8px;
+      padding: 0.42rem 0.8rem;
+      border-radius: 6px;
       font-size: 0.78rem;
       font-weight: 600;
       font-family: inherit;
@@ -238,19 +207,97 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      transition: all 0.2s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
     }
 
     .btn-action:hover {
-      border-color: #10b981;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      background: var(--bg-card-hover);
+      border-color: #94a3b8;
     }
 
     .btn-action.primary {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border-color: transparent;
+      background: #2d6a4f;
+      border-color: #2d6a4f;
       color: #ffffff;
+    }
+
+    .btn-action.primary:hover {
+      background: #23533e;
+    }
+
+    /* ==========================================================================
+       MODAL DE REMITENTE Y DESTINATARIO (SIN CONTRASEÑA Y SIN REDIRECCIÓN)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 1500;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+      animation: fadeSlideUp 0.2s ease-out;
+    }
+
+    .modal-header {
+      padding: 0.95rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 1.15rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 0.85rem 1.25rem;
+      background: var(--bg-main);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.58rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      font-family: inherit;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: #2d6a4f;
     }
 
     /* ==========================================================================
@@ -259,108 +306,89 @@
     .dashboard-container {
       max-width: 1580px;
       margin: 0 auto;
-      padding: 1.4rem 1.75rem 3rem;
+      padding: 1.25rem 1.75rem 3rem;
       display: flex;
       flex-direction: column;
-      gap: 1.35rem;
+      gap: 1.2rem;
     }
 
     /* ==========================================================================
-       1. TARJETAS KPI ANIMADAS CON BARRA DE PROGRESO Y GLOW
+       1. TARJETAS KPI SOBRIAS
        ========================================================================== */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1.15rem;
+      gap: 1rem;
     }
 
     .kpi-card {
       background: var(--bg-card);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1.2rem 1.35rem;
+      border-radius: 8px;
+      padding: 1.1rem 1.25rem;
       box-shadow: var(--card-shadow);
       position: relative;
       overflow: hidden;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+      transition: border-color 0.15s ease;
     }
 
     .kpi-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--kpi-accent, #10b981);
-      box-shadow: 0 14px 32px -10px var(--kpi-glow, rgba(16, 185, 129, 0.3));
-    }
-
-    .kpi-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--kpi-accent, #10b981);
+      border-color: #94a3b8;
     }
 
     .kpi-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.6rem;
+      align-items: center;
+      margin-bottom: 0.45rem;
     }
 
     .kpi-label {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: var(--text-secondary);
     }
 
     .kpi-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      background: var(--kpi-glow, rgba(16, 185, 129, 0.15));
-      color: var(--kpi-accent, #10b981);
+      display: none;
     }
 
     .kpi-value {
-      font-size: 2.05rem;
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
+      font-size: 1.85rem;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
       color: var(--text-primary);
     }
 
     .kpi-footer {
-      margin-top: 0.65rem;
+      margin-top: 0.6rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       color: var(--text-secondary);
     }
 
     .kpi-mini-bar {
       height: 4px;
       width: 100%;
-      background: rgba(148, 163, 184, 0.15);
-      border-radius: 99px;
+      background: var(--bg-secondary);
+      border-radius: 2px;
       margin-top: 0.55rem;
       overflow: hidden;
     }
 
     .kpi-mini-fill {
       height: 100%;
-      border-radius: 99px;
-      background: var(--kpi-accent, #10b981);
+      border-radius: 2px;
+      background: var(--kpi-accent, #475569);
       width: 0%;
-      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: width 0.8s ease;
     }
 
     /* ==========================================================================
@@ -368,20 +396,14 @@
        ========================================================================== */
     .dash-card {
       background: var(--bg-card);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 8px;
       box-shadow: var(--card-shadow);
       overflow: hidden;
-      transition: border-color 0.25s ease;
-    }
-
-    .dash-card:hover {
-      border-color: rgba(148, 163, 184, 0.22);
     }
 
     .card-header {
-      padding: 1.1rem 1.4rem;
+      padding: 0.95rem 1.25rem;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
@@ -393,23 +415,15 @@
     .card-title-group {
       display: flex;
       align-items: center;
-      gap: 0.7rem;
+      gap: 0.65rem;
     }
 
     .card-badge-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      background: rgba(16, 185, 129, 0.15);
-      color: #10b981;
+      display: none;
     }
 
     .card-title {
-      font-size: 1rem;
+      font-size: 0.96rem;
       font-weight: 700;
       color: var(--text-primary);
     }
@@ -420,37 +434,33 @@
     }
 
     .card-body {
-      padding: 1.35rem 1.4rem;
+      padding: 1.2rem 1.25rem;
     }
 
-    /* Botonera interactiva tipo píldora */
+    /* Botonera interactiva tipo pestaña */
     .pill-tabs {
       display: inline-flex;
-      background: rgba(15, 23, 42, 0.45);
+      background: var(--bg-secondary);
       border: 1px solid var(--border-color);
-      padding: 0.25rem;
-      border-radius: 10px;
-      gap: 0.25rem;
-    }
-
-    body.light-theme .pill-tabs {
-      background: #e2e8f0;
+      padding: 0.2rem;
+      border-radius: 6px;
+      gap: 0.2rem;
     }
 
     .pill-tabs button {
       border: none;
       background: transparent;
       color: var(--text-secondary);
-      padding: 0.38rem 0.85rem;
-      border-radius: 7px;
-      font-size: 0.78rem;
+      padding: 0.34rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.76rem;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: background-color 0.15s ease, color 0.15s ease;
     }
 
     .pill-tabs button:hover {
@@ -458,36 +468,35 @@
     }
 
     .pill-tabs button.active {
-      background: var(--active-bg, #10b981);
-      color: #ffffff;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
     }
 
     /* Filtros de leyenda interactivos */
     .legend-pills {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 0.45rem;
     }
 
     .legend-btn {
       border: 1px solid var(--border-color);
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--bg-card);
       color: var(--text-primary);
-      padding: 0.3rem 0.7rem;
-      border-radius: 99px;
-      font-size: 0.76rem;
+      padding: 0.28rem 0.65rem;
+      border-radius: 5px;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      transition: all 0.2s ease;
+      transition: border-color 0.15s ease;
     }
 
     .legend-btn:hover {
-      transform: scale(1.04);
-      border-color: var(--dot-color);
+      border-color: #94a3b8;
     }
 
     .legend-btn.dimmed {
@@ -495,78 +504,71 @@
     }
 
     .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
       display: inline-block;
-      box-shadow: 0 0 8px var(--dot-color);
     }
 
     /* ==========================================================================
-       2. PANEL CENTRAL: BARRAS APILADAS ANIMADAS + INSPECTOR CON RADAR / GAUGES
+       2. PANEL CENTRAL: BARRAS APILADAS + INSPECTOR CON RADAR / GAUGES
        ========================================================================== */
     .main-grid {
       display: grid;
       grid-template-columns: 1.55fr 1fr;
-      gap: 1.5rem;
+      gap: 1.25rem;
       align-items: start;
     }
 
     .stacked-rows-container {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.35rem;
     }
 
     .district-bar-row {
       display: grid;
-      grid-template-columns: 30px 160px 1fr 78px;
+      grid-template-columns: 28px 168px 1fr 72px;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.48rem 0.75rem;
-      border-radius: 10px;
+      gap: 0.7rem;
+      padding: 0.42rem 0.65rem;
+      border-radius: 6px;
       cursor: pointer;
       border: 1px solid transparent;
-      background: rgba(255, 255, 255, 0.02);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    body.light-theme .district-bar-row {
-      background: #f8fafc;
+      background: transparent;
+      user-select: none;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
     }
 
     .district-bar-row:hover {
-      transform: translateX(6px);
-      background: rgba(16, 185, 129, 0.08);
-      border-color: rgba(16, 185, 129, 0.3);
+      background: var(--bg-secondary);
     }
 
     .district-bar-row.selected {
-      background: linear-gradient(90deg, rgba(16, 185, 129, 0.16) 0%, rgba(99, 102, 241, 0.08) 100%);
-      border-color: #10b981;
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+      background: var(--bg-secondary);
+      border-color: #64748b;
     }
 
     .rank-badge {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      background: rgba(148, 163, 184, 0.15);
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: var(--bg-secondary);
       color: var(--text-secondary);
-      font-size: 0.74rem;
-      font-weight: 800;
+      font-size: 0.72rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .district-bar-row.selected .rank-badge {
-      background: #10b981;
+      background: #1e293b;
       color: #ffffff;
     }
 
     .district-label {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-primary);
       white-space: nowrap;
@@ -574,138 +576,122 @@
       text-overflow: ellipsis;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
+    }
+
+    .sel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
 
     .stacked-track {
-      height: 26px;
+      height: 20px;
       width: 100%;
       display: flex;
       overflow: hidden;
-      border-radius: 7px;
-      background: rgba(15, 23, 42, 0.5);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-      padding: 2px;
-      gap: 2px;
-    }
-
-    body.light-theme .stacked-track {
-      background: #e2e8f0;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+      border-radius: 3px;
+      background: var(--bg-secondary);
+      gap: 1px;
     }
 
     .stack-seg {
       height: 100%;
-      border-radius: 4px;
-      transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease, transform 0.2s ease;
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.15s ease;
       position: relative;
     }
 
     .stack-seg:hover {
-      filter: brightness(1.22);
-      transform: scaleY(1.08);
-      z-index: 2;
+      opacity: 0.85;
     }
 
-    .seg-veg { background: linear-gradient(135deg, #34d399 0%, #059669 100%); }
-    .seg-vias { background: linear-gradient(135deg, #94a3b8 0%, #475569 100%); }
-    .seg-urb { background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%); }
-    .seg-suelo { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
+    .seg-veg { background: var(--c-veg); }
+    .seg-vias { background: var(--c-vias); }
+    .seg-urb { background: var(--c-urb); }
+    .seg-suelo { background: var(--c-suelo); }
 
     .district-metric-readout {
-      font-size: 0.9rem;
-      font-weight: 800;
+      font-size: 0.86rem;
+      font-weight: 700;
       text-align: right;
       color: var(--text-primary);
     }
 
     /* ==========================================================================
-       PANEL INSPECTOR DE DISTRITO (CON GRÁFICO RADAR + ANILLOS ANIMADOS)
+       PANEL INSPECTOR DE DISTRITO
        ========================================================================== */
     .inspector-card {
-      background: linear-gradient(160deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
-      border: 1px solid var(--border-glow);
-      border-radius: 14px;
-      padding: 1.25rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    }
-
-    body.light-theme .inspector-card {
-      background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.15rem;
     }
 
     .inspector-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 0.75rem;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.85rem;
-      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.9rem;
     }
 
     .inspector-gauges {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.7rem;
-      margin-bottom: 1rem;
+      gap: 0.65rem;
+      margin-bottom: 0.9rem;
     }
 
     .gauge-box {
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 0.7rem 0.85rem;
+      border-radius: 6px;
+      padding: 0.65rem 0.8rem;
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s ease;
-    }
-
-    body.light-theme .gauge-box {
-      background: #ffffff;
-    }
-
-    .gauge-box:hover {
-      transform: translateY(-2px);
     }
 
     .gauge-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 600;
       color: var(--text-secondary);
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.2rem;
     }
 
     .gauge-val {
-      font-size: 1.25rem;
-      font-weight: 800;
+      font-size: 1.18rem;
+      font-weight: 700;
       color: var(--text-primary);
     }
 
     .gauge-ha {
-      font-size: 0.74rem;
+      font-size: 0.73rem;
       color: var(--text-muted);
     }
 
     .gauge-progress {
-      height: 5px;
+      height: 4px;
       width: 100%;
-      background: rgba(148, 163, 184, 0.15);
-      border-radius: 99px;
-      margin-top: 0.45rem;
+      background: var(--bg-secondary);
+      border-radius: 2px;
+      margin-top: 0.4rem;
       overflow: hidden;
     }
 
     .gauge-progress-bar {
       height: 100%;
-      border-radius: 99px;
-      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      border-radius: 2px;
+      transition: width 0.5s ease;
     }
 
     .radar-box {
-      height: 210px;
+      height: 225px;
       position: relative;
       margin: 0.5rem 0;
     }
@@ -716,35 +702,31 @@
     .bottom-grid {
       display: grid;
       grid-template-columns: 1.35fr 1fr;
-      gap: 1.35rem;
+      gap: 1.2rem;
       align-items: stretch;
     }
 
     table.dash-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.83rem;
+      font-size: 0.82rem;
     }
 
     table.dash-table th,
     table.dash-table td {
-      padding: 0.65rem 0.75rem;
+      padding: 0.56rem 0.7rem;
       border-bottom: 1px solid var(--border-color);
       text-align: left;
     }
 
     table.dash-table th {
-      font-size: 0.74rem;
+      font-size: 0.71rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       color: var(--text-secondary);
-      background: rgba(15, 23, 42, 0.35);
+      background: var(--bg-secondary);
       user-select: none;
-    }
-
-    body.light-theme table.dash-table th {
-      background: #f1f5f9;
     }
 
     table.dash-table th.num,
@@ -753,16 +735,17 @@
     }
 
     table.dash-table tbody tr {
-      transition: background-color 0.15s ease, transform 0.15s ease;
+      transition: background-color 0.15s ease;
+      user-select: none;
     }
 
     table.dash-table tbody tr:hover {
-      background-color: rgba(16, 185, 129, 0.08);
+      background-color: var(--bg-card-hover);
     }
 
     table.dash-table tbody tr.active-row {
-      background-color: rgba(16, 185, 129, 0.16);
-      border-left: 3px solid #10b981;
+      background-color: var(--bg-secondary);
+      border-left: 3px solid #2d6a4f;
     }
 
     th.sortable {
@@ -770,17 +753,17 @@
     }
 
     th.sortable:hover {
-      color: #10b981;
+      color: var(--text-primary);
     }
 
     .cell-bar-wrap {
       position: relative;
-      padding: 0.22rem 0.5rem;
+      padding: 0.18rem 0.45rem;
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      min-width: 82px;
-      border-radius: 5px;
+      min-width: 78px;
+      border-radius: 3px;
       overflow: hidden;
     }
 
@@ -789,15 +772,15 @@
       top: 2px;
       bottom: 2px;
       right: 0;
-      border-radius: 4px;
+      border-radius: 2px;
       z-index: 0;
-      transition: width 0.5s ease;
+      transition: width 0.4s ease;
     }
 
     .cell-bar-val {
       position: relative;
       z-index: 1;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     /* ==========================================================================
@@ -811,32 +794,31 @@
 
     .sample-pills button {
       border: 1px solid var(--border-color);
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--bg-card);
       color: var(--text-secondary);
-      padding: 0.3rem 0.65rem;
-      border-radius: 7px;
-      font-size: 0.75rem;
+      padding: 0.28rem 0.6rem;
+      border-radius: 5px;
+      font-size: 0.74rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: border-color 0.15s ease, color 0.15s ease;
     }
 
     .sample-pills button:hover {
       color: var(--text-primary);
-      border-color: #10b981;
+      border-color: #94a3b8;
     }
 
     .sample-pills button.active {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: #1e293b;
       color: #ffffff;
-      border-color: transparent;
-      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+      border-color: #1e293b;
     }
 
     .trio-viewer {
       display: grid;
       grid-template-columns: 1.15fr 1fr;
-      gap: 1.15rem;
+      gap: 1rem;
       align-items: start;
     }
 
@@ -845,9 +827,8 @@
       width: 100%;
       aspect-ratio: 1 / 1;
       overflow: hidden;
-      border-radius: 12px;
-      border: 2px solid rgba(16, 185, 129, 0.45);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
       user-select: none;
     }
 
@@ -869,9 +850,9 @@
       top: 0;
       bottom: 0;
       left: 50%;
-      width: 3px;
-      background: #10b981;
-      box-shadow: 0 0 12px #10b981;
+      width: 2px;
+      background: #ffffff;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.55);
       pointer-events: none;
       z-index: 3;
     }
@@ -881,20 +862,19 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 34px;
-      height: 34px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      background: #10b981;
+      background: #1e293b;
       border: 2px solid #ffffff;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 800;
+      font-size: 0.8rem;
+      font-weight: 700;
       pointer-events: none;
       z-index: 4;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
     }
 
     .curtain-range {
@@ -911,7 +891,7 @@
       width: 100%;
       aspect-ratio: 1 / 1;
       object-fit: cover;
-      border-radius: 12px;
+      border-radius: 6px;
       border: 1px solid var(--border-color);
       display: block;
     }
@@ -920,53 +900,46 @@
     .oem-chips-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-      gap: 0.65rem;
+      gap: 0.6rem;
     }
 
     .oem-chip {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      padding: 0.55rem 0.75rem;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.03);
+      gap: 0.55rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 6px;
+      background: var(--bg-main);
       border: 1px solid var(--border-color);
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    body.light-theme .oem-chip {
-      background: #f8fafc;
+      transition: border-color 0.15s ease;
     }
 
     .oem-chip:hover {
-      transform: translateY(-3px);
-      border-color: #10b981;
+      border-color: #94a3b8;
     }
 
     .oem-swatch {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
       flex-shrink: 0;
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(0, 0, 0, 0.15);
     }
 
     /* Tooltip flotante */
     .tooltip-box {
       position: fixed;
       pointer-events: none;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(16, 185, 129, 0.5);
+      background: #1e293b;
       color: #ffffff;
-      padding: 0.55rem 0.85rem;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      line-height: 1.45;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      line-height: 1.4;
       z-index: 1000;
       display: none;
       white-space: nowrap;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     @media (max-width: 1200px) {
@@ -984,7 +957,7 @@
         grid-template-columns: 1fr;
       }
       .district-bar-row {
-        grid-template-columns: 26px 120px 1fr 62px;
+        grid-template-columns: 26px 125px 1fr 62px;
       }
       .trio-viewer {
         grid-template-columns: 1fr;
@@ -996,6 +969,82 @@
 
   <!-- Tooltip interactivo -->
   <div id="globalTooltip" class="tooltip-box" role="status" aria-live="polite"></div>
+
+  <!-- Notificación flotante (Toast) -->
+  <div id="toastNotif" role="status" aria-live="polite" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    max-width: 430px;
+    background: #18202c;
+    color: #ffffff;
+    border-left: 4px solid #2d6a4f;
+    padding: 0.9rem 1.05rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+    z-index: 2000;
+    display: none;
+  "></div>
+
+  <!-- ========================================================================
+       VENTANA DE REMITENTE Y DESTINATARIO (SIN CONTRASEÑA Y SIN REDIRECCIÓN)
+       ======================================================================== -->
+  <div id="notifModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalNotifTitle" onclick="if(event.target===this) cerrarModalNotificacion()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.55rem;">
+          <i class="bi bi-send-check-fill" style="color: #2d6a4f; font-size: 1.1rem;"></i>
+          <h3 id="modalNotifTitle" style="font-size: 0.98rem; font-weight: 700;">Enviar Notificación de Cobertura</h3>
+        </div>
+        <button type="button" onclick="cerrarModalNotificacion()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.25rem; cursor: pointer;" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <label for="modalRemitenteInput" style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-primary);">
+            ¿Quién envía esta notificación? (Correo remitente)
+          </label>
+          <input type="email" id="modalRemitenteInput" class="modal-input" placeholder="tu.correo@gmail.com" onkeydown="if(event.key==='Enter') document.getElementById('modalDestinatarioInput').focus()">
+        </div>
+
+        <div>
+          <label for="modalDestinatarioInput" style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-primary);">
+            ¿A quién le llega esta notificación? (Correo destinatario)
+          </label>
+          <input type="email" id="modalDestinatarioInput" class="modal-input" placeholder="destinatario@correo.com" onkeydown="if(event.key==='Enter') confirmarEnvioNotificacion()">
+        </div>
+
+        <!-- Vista previa de los 1–3 distritos seleccionados + sus barras + gráfico del Inspector -->
+        <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.8rem; font-size: 0.78rem;">
+          <div style="font-weight: 700; color: #2d6a4f; margin-bottom: 0.45rem;" id="modalPreviewDistrito">
+            Distritos seleccionados (1): San Isidro
+          </div>
+          <div id="modalPreviewBarras" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+
+          <div style="margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 0.71rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.35rem;">
+              Gráfico adjunto: Inspector de Distrito Activo
+            </div>
+            <img id="modalRadarPreview" src="" alt="Vista previa del gráfico del Inspector" style="max-height: 155px; width: auto; border-radius: 4px; border: 1px solid var(--border-color); background: #ffffff; padding: 4px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a href="/ultimo-reporte" target="_blank" class="btn-action" style="text-decoration: none; font-size: 0.74rem;" title="Ver último reporte HTML generado">
+          <i class="bi bi-file-earmark-richtext"></i> Ver último reporte
+        </a>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn-action" onclick="cerrarModalNotificacion()">Cancelar</button>
+          <button type="button" class="btn-action primary" id="btnConfirmarEnvio" onclick="confirmarEnvioNotificacion()">
+            <i class="bi bi-send-fill"></i> Enviar notificación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================================================
        BARRA SUPERIOR DE DASHBOARD INTERACTIVO
@@ -1021,16 +1070,20 @@
       </div>
 
       <button type="button" class="btn-action" onclick="alternarTema()" id="btnThemeToggle" title="Cambiar modo oscuro / claro">
-        <i class="bi bi-sun-fill" id="themeIcon"></i>
-        <span id="themeText">Modo Claro</span>
+        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+        <span id="themeText">Modo Oscuro</span>
       </button>
 
       <button type="button" class="btn-action" onclick="descargarCSV('tabla_porcentajes.csv')">
         <i class="bi bi-download"></i> CSV %
       </button>
 
-      <button type="button" class="btn-action primary" onclick="descargarCSV('indicadores_por_distrito.csv')">
+      <button type="button" class="btn-action" onclick="descargarCSV('indicadores_por_distrito.csv')">
         <i class="bi bi-file-earmark-spreadsheet"></i> CSV Completo (ha)
+      </button>
+
+      <button type="button" class="btn-action primary" onclick="abrirModalNotificacion()" id="btnTopSendNotif">
+        <i class="bi bi-bell-fill"></i> Enviar Notif. <span id="badgeTopCount">(1)</span>
       </button>
     </div>
   </nav>
@@ -1040,9 +1093,9 @@
        ======================================================================== -->
   <main class="dashboard-container">
 
-    <!-- 1. TARJETAS KPI CON CONTADORES ANIMADOS Y GLOW -->
+    <!-- 1. TARJETAS KPI CON CONTADORES -->
     <div class="kpi-grid">
-      <div class="kpi-card anim-card delay-1" style="--kpi-accent: #06b6d4; --kpi-glow: rgba(6, 182, 212, 0.2);">
+      <div class="kpi-card anim-card delay-1" style="--kpi-accent: #2b6cb0;">
         <div class="kpi-top">
           <span class="kpi-label">Superficie Clasificada</span>
           <div class="kpi-icon"><i class="bi bi-bounding-box-circles"></i></div>
@@ -1050,17 +1103,17 @@
         <div class="kpi-value num"><span class="counter" data-target="2115.19" data-decimals="2">0</span> <span style="font-size: 1rem; font-weight: 600; color: var(--text-secondary);">ha</span></div>
         <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="96%"></div></div>
         <div class="kpi-footer">
-          <span><i class="bi bi-grid-3x3-gap-fill me-1"></i>240 recortes GeoTIFF</span>
+          <span>240 recortes GeoTIFF</span>
           <strong>0,292 m/px</strong>
         </div>
       </div>
 
-      <div class="kpi-card anim-card delay-2" style="--kpi-accent: #10b981; --kpi-glow: rgba(16, 185, 129, 0.22);">
+      <div class="kpi-card anim-card delay-2" style="--kpi-accent: #2d6a4f;">
         <div class="kpi-top">
           <span class="kpi-label">Líder Cobertura Vegetal</span>
           <div class="kpi-icon"><i class="bi bi-tree-fill"></i></div>
         </div>
-        <div class="kpi-value num" style="color: #10b981;"><span class="counter" data-target="27.02" data-decimals="2">0</span>%</div>
+        <div class="kpi-value num" style="color: #2d6a4f;"><span class="counter" data-target="27.02" data-decimals="2">0</span>%</div>
         <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="82%"></div></div>
         <div class="kpi-footer">
           <span>Máx: <strong>San Isidro</strong> (47,19 ha)</span>
@@ -1068,12 +1121,12 @@
         </div>
       </div>
 
-      <div class="kpi-card anim-card delay-3" style="--kpi-accent: #ef4444; --kpi-glow: rgba(239, 68, 68, 0.22);">
+      <div class="kpi-card anim-card delay-3" style="--kpi-accent: #b5483a;">
         <div class="kpi-top">
           <span class="kpi-label">Superficie Urbanizada</span>
           <div class="kpi-icon"><i class="bi bi-buildings-fill"></i></div>
         </div>
-        <div class="kpi-value num" style="color: #f87171;"><span class="counter" data-target="67.87" data-decimals="2">0</span>%</div>
+        <div class="kpi-value num" style="color: #b5483a;"><span class="counter" data-target="67.87" data-decimals="2">0</span>%</div>
         <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="68%"></div></div>
         <div class="kpi-footer">
           <span>Total: <strong>1 437,43 ha</strong></span>
@@ -1081,12 +1134,12 @@
         </div>
       </div>
 
-      <div class="kpi-card anim-card delay-4" style="--kpi-accent: #6366f1; --kpi-glow: rgba(99, 102, 241, 0.22);">
+      <div class="kpi-card anim-card delay-4" style="--kpi-accent: #3b5998;">
         <div class="kpi-top">
           <span class="kpi-label">Precisión del Modelo (mIoU)</span>
           <div class="kpi-icon"><i class="bi bi-cpu-fill"></i></div>
         </div>
-        <div class="kpi-value num" style="color: #818cf8;"><span class="counter" data-target="0.6356" data-decimals="4">0</span></div>
+        <div class="kpi-value num"><span class="counter" data-target="0.6356" data-decimals="4">0</span></div>
         <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="78%"></div></div>
         <div class="kpi-footer">
           <span>U-Net + EfficientNet-B4</span>
@@ -1102,39 +1155,45 @@
           <div class="card-badge-icon"><i class="bi bi-bar-chart-steps"></i></div>
           <div>
             <h2 class="card-title">Distribución Interactiva de Cobertura por Distrito</h2>
-            <div class="card-subtitle">Cambia el criterio para reordenar con animación en vivo o haz clic en un distrito para analizar su perfil</div>
+            <div class="card-subtitle">
+              Haz clic en un distrito o mantén <strong>Ctrl + clic</strong> para seleccionar hasta <strong>3 distritos</strong>
+              · <span id="selectionStatusLabel" style="color: #2d6a4f; font-weight: 700;">1 distrito seleccionado</span>
+              <button type="button" id="btnLimpiarMulti" onclick="limpiarSeleccionMultiple()" style="display: none; margin-left: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); border-radius: 4px; padding: 1px 6px; font-size: 0.72rem; cursor: pointer;">
+                Dejar solo 1
+              </button>
+            </div>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap;">
           <!-- Leyenda interactiva con filtro -->
           <div class="legend-pills">
-            <button type="button" class="legend-btn" style="--dot-color: #10b981;" onclick="ordenarDistritosAnimado('veg')">
-              <span class="legend-dot" style="background: #10b981;"></span>Vegetación
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('veg')">
+              <span class="legend-dot" style="background: #2d6a4f;"></span>Vegetación
             </button>
-            <button type="button" class="legend-btn" style="--dot-color: #94a3b8;" onclick="ordenarDistritosAnimado('vias')">
-              <span class="legend-dot" style="background: #94a3b8;"></span>Vías
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('vias')">
+              <span class="legend-dot" style="background: #5c677d;"></span>Vías
             </button>
-            <button type="button" class="legend-btn" style="--dot-color: #ef4444;" onclick="ordenarDistritosAnimado('urb')">
-              <span class="legend-dot" style="background: #ef4444;"></span>Urbanizada
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('urb')">
+              <span class="legend-dot" style="background: #b5483a;"></span>Urbanizada
             </button>
-            <button type="button" class="legend-btn" style="--dot-color: #f59e0b;" onclick="ordenarDistritosAnimado('suelo')">
-              <span class="legend-dot" style="background: #f59e0b;"></span>Suelo desc.
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('suelo')">
+              <span class="legend-dot" style="background: #c88a2b;"></span>Suelo desc.
             </button>
           </div>
 
           <!-- Selector de ordenamiento animado -->
           <div class="pill-tabs" role="group" aria-label="Ordenar distritos">
-            <button type="button" class="active" data-sort="veg" style="--active-bg: #10b981;" onclick="ordenarDistritosAnimado('veg')">
+            <button type="button" class="active" data-sort="veg" onclick="ordenarDistritosAnimado('veg')">
               <i class="bi bi-tree"></i> % Veg.
             </button>
-            <button type="button" data-sort="vias" style="--active-bg: #64748b;" onclick="ordenarDistritosAnimado('vias')">
+            <button type="button" data-sort="vias" onclick="ordenarDistritosAnimado('vias')">
               <i class="bi bi-signpost-2"></i> % Vías
             </button>
-            <button type="button" data-sort="urb" style="--active-bg: #ef4444;" onclick="ordenarDistritosAnimado('urb')">
+            <button type="button" data-sort="urb" onclick="ordenarDistritosAnimado('urb')">
               <i class="bi bi-buildings"></i> % Urb.
             </button>
-            <button type="button" data-sort="suelo" style="--active-bg: #f59e0b;" onclick="ordenarDistritosAnimado('suelo')">
+            <button type="button" data-sort="suelo" onclick="ordenarDistritosAnimado('suelo')">
               <i class="bi bi-layers"></i> % Suelo
             </button>
           </div>
@@ -1150,14 +1209,14 @@
           <aside class="inspector-card" aria-live="polite">
             <div class="inspector-header">
               <div>
-                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #10b981; font-weight: 800;">
-                  <i class="bi bi-broadcast me-1"></i>Inspector de Distrito Activo
+                <div id="inspectorBadgeLabel" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #2d6a4f; font-weight: 700;">
+                  Inspector de Distrito Activo
                 </div>
-                <h3 id="panelDistrictName" style="font-size: 1.35rem; font-weight: 800; margin-top: 0.1rem;">San Isidro</h3>
+                <h3 id="panelDistrictName" style="font-size: 1.25rem; font-weight: 700; margin-top: 0.1rem;">San Isidro</h3>
               </div>
-              <div style="text-align: right;">
-                <span id="panelDistrictArea" class="num" style="font-size: 0.95rem; font-weight: 800; color: #06b6d4;">174,65 ha</span>
-                <div style="font-size: 0.72rem; color: var(--text-secondary);">20 recortes satelitales</div>
+              <div style="text-align: right; flex-shrink: 0;">
+                <span id="panelDistrictArea" class="num" style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">174,65 ha</span>
+                <div id="panelDistrictCuts" style="font-size: 0.72rem; color: var(--text-secondary);">20 recortes satelitales</div>
               </div>
             </div>
 
@@ -1165,10 +1224,10 @@
             <div id="panelIndicatorsList" class="inspector-gauges"></div>
 
             <!-- Gráfico Radar Comparativo: Distrito vs Promedio Lima -->
-            <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">Perfil del Distrito vs. Promedio Lima</span>
-                <span style="font-size: 0.72rem; color: #10b981;">● Distrito &nbsp; <span style="color: #94a3b8;">● Promedio</span></span>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.25rem;">
+                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">Perfil vs. Promedio Lima</span>
+                <span id="radarLegendInline" style="font-size: 0.71rem; font-weight: 600;"></span>
               </div>
               <div class="radar-box">
                 <canvas id="districtRadarChart"></canvas>
@@ -1189,12 +1248,10 @@
       <div class="dash-card anim-card delay-3">
         <div class="card-header">
           <div class="card-title-group">
-            <div class="card-badge-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
-              <i class="bi bi-table"></i>
-            </div>
+            <div class="card-badge-icon"><i class="bi bi-table"></i></div>
             <div>
               <h2 class="card-title">Tabla Comparativa Interactiva</h2>
-              <div class="card-subtitle">Haz clic en cualquier encabezado para ordenar o en una fila para cargar el distrito en el inspector</div>
+              <div class="card-subtitle">Haz clic en cualquier encabezado para ordenar o en una fila (<strong>Ctrl + clic</strong> hasta 3)</div>
             </div>
           </div>
         </div>
@@ -1221,9 +1278,7 @@
       <div class="dash-card anim-card delay-4" id="panel-verificacion">
         <div class="card-header">
           <div class="card-title-group">
-            <div class="card-badge-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
-              <i class="bi bi-sliders"></i>
-            </div>
+            <div class="card-badge-icon"><i class="bi bi-sliders"></i></div>
             <div>
               <h2 class="card-title">Escáner Satelital Píxel a Píxel (Cortinilla)</h2>
               <div class="card-subtitle">Arrastra el divisor central para contrastar imagen satelital y máscara</div>
@@ -1244,24 +1299,25 @@
                 <input type="range" min="0" max="100" value="50" class="curtain-range" id="curtainSlider" aria-label="Deslizar cortinilla" oninput="actualizarCortinilla(this.value)">
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.45rem; font-weight: 600;">
-                <span><i class="bi bi-globe-americas me-1"></i>Captura Satelital</span>
-                <span style="color: #10b981;">Predicción Superpuesta<i class="bi bi-layers-fill ms-1"></i></span>
+                <span>Captura Satelital</span>
+                <span style="color: #2d6a4f;">Predicción Superpuesta</span>
               </div>
             </div>
 
-            <!-- Máscara de clasificación pura + IoU por clase -->
+            <!-- Máscara de clasificación pura + Barras dinámicas del distrito seleccionado -->
             <div class="mask-reference-box">
               <img id="curtainImgMask" src="" alt="Máscara de segmentación">
-              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 0.45rem 0 0.75rem;" id="sampleCaption">
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 0.45rem 0 0.25rem;" id="sampleCaption">
                 Máscara de 9 clases
               </div>
+              <div id="sampleDistrictNotice" style="font-size: 0.73rem; color: var(--text-secondary); margin-bottom: 0.65rem;"></div>
 
-              <!-- Barras de IoU por indicador con brillo -->
-              <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem;">
-                <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.55rem;">
-                  Precisión IoU por Clase
+              <!-- Barras dinámicas del distrito seleccionado -->
+              <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem;">
+                <div id="scannerDistTitle" style="font-size: 0.71rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                  Cobertura en San Isidro (mIoU global: 0,6356)
                 </div>
-                <div id="indicatorIouContainer" style="display: flex; flex-direction: column; gap: 0.55rem;"></div>
+                <div id="indicatorIouContainer" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
               </div>
             </div>
           </div>
@@ -1274,9 +1330,7 @@
     <div class="dash-card anim-card delay-4">
       <div class="card-header">
         <div class="card-title-group">
-          <div class="card-badge-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
-            <i class="bi bi-palette-fill"></i>
-          </div>
+          <div class="card-badge-icon"><i class="bi bi-palette-fill"></i></div>
           <div>
             <h2 class="card-title">Paleta Oficial de Clases de Segmentación (OpenEarthMap)</h2>
             <div class="card-subtitle">Codificación RGB de las 9 clases detectadas por la red neuronal</div>
@@ -1290,20 +1344,13 @@
 
   </main>
 
-  <!-- ==========================================================================
-       LÓGICA INTERACTIVA, CONTADORES ANIMADOS, GRÁFICO RADAR Y FLIP ANIMATION
-       ========================================================================== -->
+  <!-- ========================================================================
+       LÓGICA INTERACTIVA: CTRL+CLIC (HASTA 3), INSPECTOR COMPARATIVO Y ENVÍO DIRECTO
+       ======================================================================== -->
   <script>
     const BASE_STATIC = (window.location.protocol === 'file:' && window.location.pathname.includes('/templates/'))
       ? '../static/'
       : 'static/';
-
-    const INDICADORES_IOU = [
-      { nombre: "Vegetación", iou: 0.8192, color: "#10b981" },
-      { nombre: "Superficie urb.", iou: 0.7402, color: "#ef4444" },
-      { nombre: "Vías", iou: 0.6032, color: "#94a3b8" },
-      { nombre: "Suelo desc.", iou: 0.4232, color: "#f59e0b" }
-    ];
 
     const DISTRITOS_DATA = [
       { id: "san_isidro", nombre: "San Isidro", area: 174.65, veg: 27.02, vias: 12.43, urb: 60.11, suelo: 0.44, ha_veg: 47.19, ha_vias: 21.70, ha_urb: 104.99, ha_suelo: 0.76, px_tot: 20971520, px_clas: 20483415 },
@@ -1318,6 +1365,12 @@
       { id: "ate", nombre: "Ate", area: 177.20, veg: 4.80, vias: 10.70, urb: 74.11, suelo: 10.39, ha_veg: 8.50, ha_vias: 18.96, ha_urb: 131.33, ha_suelo: 18.41, px_tot: 20971520, px_clas: 20782906 },
       { id: "ancon", nombre: "Ancón", area: 163.24, veg: 4.39, vias: 9.57, urb: 61.28, suelo: 24.76, ha_veg: 7.16, ha_vias: 15.62, ha_urb: 100.04, ha_suelo: 40.42, px_tot: 20971520, px_clas: 19145391 },
       { id: "cercado", nombre: "Cercado de Lima", area: 178.67, veg: 3.52, vias: 14.50, urb: 81.89, suelo: 0.08, ha_veg: 6.30, ha_vias: 25.91, ha_urb: 146.32, ha_suelo: 0.15, px_tot: 20971520, px_clas: 20954883 }
+    ];
+
+    const COLORES_SELECCION = [
+      { border: "#2d6a4f", bg: "rgba(45, 106, 79, 0.18)" },
+      { border: "#2b6cb0", bg: "rgba(43, 108, 176, 0.16)" },
+      { border: "#b5483a", bg: "rgba(181, 72, 58, 0.16)" }
     ];
 
     const CLASES_OEM = [
@@ -1342,12 +1395,332 @@
     ];
 
     let indicadorOrdenGrafico = 'veg';
-    let distritoSeleccionadoId = 'san_isidro';
+    let distritosSeleccionados = ['san_isidro'];
     let estadoOrdenTabla = { col: 'veg', dir: 'desc' };
     let radarChartInstance = null;
 
     function fmt(num, decimales = 2) {
       return Number(num).toFixed(decimales).replace('.', ',');
+    }
+
+    function obtenerDistritosActivos() {
+      return distritosSeleccionados
+        .map(id => DISTRITOS_DATA.find(item => item.id === id))
+        .filter(Boolean);
+    }
+
+    // Exporta el gráfico Radar siempre nítido sobre fondo blanco (incluso en Modo Oscuro)
+    function capturarImagenRadar() {
+      if (!radarChartInstance || !radarChartInstance.canvas) return '';
+      const srcCanvas = radarChartInstance.canvas;
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = srcCanvas.width;
+      exportCanvas.height = srcCanvas.height;
+      const ctx = exportCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+      ctx.drawImage(srcCanvas, 0, 0);
+      return exportCanvas.toDataURL('image/png', 1.0);
+    }
+
+    // Genera una imagen PNG nítida con las barras de los distritos seleccionados + el gráfico Radar
+    async function generarImagenReporteCompleto(activos, radarBase64, remitente, correo) {
+      let radarImg = null;
+      if (radarBase64) {
+        radarImg = await new Promise(resolve => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = radarBase64;
+        });
+      }
+
+      const scale = 2;
+      const W = 680;
+      const headerH = 74;
+      const cardH = 84;
+      const gap = 10;
+      const radarH = radarImg ? 315 : 0;
+      const footerH = 34;
+      const H = headerH + 16 + activos.length * (cardH + gap) + radarH + footerH;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = W * scale;
+      canvas.height = H * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+
+      // Fondo general
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, W, H);
+
+      // Encabezado
+      ctx.fillStyle = '#2d6a4f';
+      ctx.fillRect(0, 0, W, headerH);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillText('UrbanVision Lima — Reporte de Cobertura Urbana Satelital', 20, 27);
+      ctx.font = '11.5px Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillText(`De: ${remitente}  ·  Para: ${correo}`, 20, 46);
+      ctx.fillText(`Distritos seleccionados (${activos.length}/3): ${activos.map(d => d.nombre).join(', ')}`, 20, 62);
+
+      const acentos = ['#2d6a4f', '#2b6cb0', '#b5483a'];
+      let y = headerH + 16;
+
+      activos.forEach((d, idx) => {
+        const x = 20;
+        const cw = W - 40;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#dce2ea';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(x, y, cw, cardH, 6);
+        } else {
+          ctx.rect(x, y, cw, cardH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Acento lateral
+        ctx.fillStyle = acentos[idx % acentos.length];
+        ctx.fillRect(x, y + 4, 4, cardH - 8);
+
+        // Nombre y hectáreas
+        ctx.fillStyle = '#18202c';
+        ctx.font = 'bold 14px Arial, sans-serif';
+        ctx.fillText(d.nombre, x + 16, y + 22);
+
+        const areaTxt = `${fmt(d.area)} ha`;
+        ctx.fillStyle = '#334155';
+        ctx.fillText(areaTxt, x + cw - ctx.measureText(areaTxt).width - 16, y + 22);
+
+        // Barra apilada de 4 indicadores
+        const bx = x + 16;
+        const by = y + 32;
+        const bw = cw - 32;
+        const bh = 16;
+        const segs = [
+          { pct: Number(d.veg) || 0, color: '#2d6a4f' },
+          { pct: Number(d.vias) || 0, color: '#5c677d' },
+          { pct: Number(d.urb) || 0, color: '#b5483a' },
+          { pct: Number(d.suelo) || 0, color: '#c88a2b' }
+        ];
+        let curX = bx;
+        segs.forEach(s => {
+          const sw = (s.pct / 100) * bw;
+          if (sw > 0) {
+            ctx.fillStyle = s.color;
+            ctx.fillRect(curX, by, sw, bh);
+            curX += sw;
+          }
+        });
+
+        // Leyenda numérica
+        ctx.fillStyle = '#334155';
+        ctx.font = '11.5px Arial, sans-serif';
+        ctx.fillText(
+          `Veg: ${fmt(d.veg)}% (${fmt(d.ha_veg)} ha) · Vías: ${fmt(d.vias)}% (${fmt(d.ha_vias)} ha) · Urb: ${fmt(d.urb)}% (${fmt(d.ha_urb)} ha) · Suelo: ${fmt(d.suelo)}% (${fmt(d.ha_suelo)} ha)`,
+          x + 16,
+          y + 66
+        );
+
+        y += cardH + gap;
+      });
+
+      // Gráfico Radar del Inspector
+      if (radarImg) {
+        ctx.fillStyle = '#334155';
+        ctx.font = 'bold 12px Arial, sans-serif';
+        const tit = 'GRÁFICO ADJUNTO: INSPECTOR DE DISTRITO ACTIVO';
+        ctx.fillText(tit, (W - ctx.measureText(tit).width) / 2, y + 18);
+
+        const boxX = 60;
+        const boxY = y + 27;
+        const boxW = W - 120;
+        const boxH = 270;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#dce2ea';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+        } else {
+          ctx.rect(boxX, boxY, boxW, boxH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        const ratio = Math.min((boxW - 24) / radarImg.width, (boxH - 20) / radarImg.height);
+        const dw = radarImg.width * ratio;
+        const dh = radarImg.height * ratio;
+        ctx.drawImage(radarImg, boxX + (boxW - dw) / 2, boxY + (boxH - dh) / 2, dw, dh);
+
+        y += radarH;
+      }
+
+      // Pie de reporte
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px Arial, sans-serif';
+      ctx.fillText('Modelo: U-Net + EfficientNet-B4 (mIoU global: 0,6356) · Estudio satelital Lima Metropolitana', 20, y + 20);
+
+      return await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    }
+
+    // ==========================================================================
+    // MODAL DE REMITENTE Y DESTINATARIO (SIN CONTRASEÑA Y SIN REDIRECCIÓN)
+    // ==========================================================================
+    function mostrarToast(titulo, cuerpo, esError = false) {
+      const toast = document.getElementById('toastNotif');
+      toast.style.borderLeftColor = esError ? '#b5483a' : '#2d6a4f';
+      toast.innerHTML = `<div style="font-weight: 700; margin-bottom: 0.2rem;">${titulo}</div><div style="color: #cbd5e1;">${cuerpo}</div>`;
+      toast.style.display = 'block';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.style.display = 'none';
+      }, 7500);
+    }
+
+    function abrirModalNotificacion() {
+      const activos = obtenerDistritosActivos();
+      const nombres = activos.map(d => d.nombre).join(', ');
+      document.getElementById('modalPreviewDistrito').textContent =
+        `Distritos seleccionados (${activos.length}/3): ${nombres}`;
+
+      document.getElementById('modalPreviewBarras').innerHTML = activos.map((d, idx) => {
+        const pal = COLORES_SELECCION[idx] || COLORES_SELECCION[0];
+        return `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-left: 3px solid ${pal.border}; border-radius: 5px; padding: 0.5rem 0.65rem;">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.3rem;">
+              <span>${d.nombre}</span>
+              <span class="num" style="color: var(--text-secondary);">${fmt(d.area)} ha</span>
+            </div>
+            <div style="height: 12px; width: 100%; display: flex; border-radius: 3px; overflow: hidden; background: var(--bg-secondary);">
+              <div style="width: ${d.veg}%; background: #2d6a4f;"></div>
+              <div style="width: ${d.vias}%; background: #5c677d;"></div>
+              <div style="width: ${d.urb}%; background: #b5483a;"></div>
+              <div style="width: ${d.suelo}%; background: #c88a2b;"></div>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.3rem;">
+              Veg: <strong>${fmt(d.veg)}%</strong> · Vías: <strong>${fmt(d.vias)}%</strong> · Urb: <strong>${fmt(d.urb)}%</strong> · Suelo: <strong>${fmt(d.suelo)}%</strong>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const radarImg = document.getElementById('modalRadarPreview');
+      if (radarChartInstance && radarImg) {
+        radarImg.src = capturarImagenRadar();
+      }
+
+      const remitenteGuardado = localStorage.getItem('uv_remitente_correo') || '';
+      const remInput = document.getElementById('modalRemitenteInput');
+      if (remitenteGuardado && !remInput.value) {
+        remInput.value = remitenteGuardado;
+      }
+
+      const modal = document.getElementById('notifModal');
+      modal.classList.add('open');
+      setTimeout(() => {
+        if (!remInput.value) {
+          remInput.focus();
+        } else {
+          document.getElementById('modalDestinatarioInput').focus();
+        }
+      }, 60);
+    }
+
+    function cerrarModalNotificacion() {
+      document.getElementById('notifModal').classList.remove('open');
+    }
+
+    async function confirmarEnvioNotificacion() {
+      const remInput = document.getElementById('modalRemitenteInput');
+      const emailInput = document.getElementById('modalDestinatarioInput');
+      const remitente = (remInput.value || '').trim();
+      const correo = (emailInput.value || '').trim();
+
+      if (!remitente || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(remitente)) {
+        mostrarToast('Remitente inválido', 'Escribe el correo electrónico de quien envía la notificación.', true);
+        remInput.focus();
+        return;
+      }
+
+      if (!correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        mostrarToast('Destinatario inválido', 'Escribe un correo electrónico válido para el destinatario.', true);
+        emailInput.focus();
+        return;
+      }
+
+      localStorage.setItem('uv_remitente_correo', remitente);
+
+      const btn = document.getElementById('btnConfirmarEnvio');
+      const activos = obtenerDistritosActivos();
+      const radarBase64 = capturarImagenRadar();
+
+      const payload = {
+        remitente: remitente,
+        correo: correo,
+        distritos: activos,
+        radar_chart_base64: radarBase64
+      };
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Preparando gráficos...';
+
+      // Copiar imagen completa (barras + Radar) al portapapeles antes de abrir Gmail
+      let graficoCopiado = false;
+      try {
+        const pngBlob = await generarImagenReporteCompleto(activos, radarBase64, remitente, correo);
+        if (pngBlob && navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+          graficoCopiado = true;
+        }
+      } catch (clipErr) {
+        graficoCopiado = false;
+      }
+
+      try {
+        const res = await fetch('/enviar-notificacion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          mostrarToast(`⚠ ${data.estado || 'Aviso'}`, data.detalle, true);
+          return;
+        }
+
+        if (data.gmail_url) {
+          window.open(data.gmail_url, '_blank');
+        }
+
+        cerrarModalNotificacion();
+
+        if (data.gmail_url && graficoCopiado) {
+          mostrarToast(
+            '✓ Gráfico copiado · Pega con Ctrl + V en Gmail',
+            'En la pestaña de Gmail que se abrió, haz clic en el mensaje y presiona Ctrl + V para pegar las barras y el gráfico Radar.',
+            false
+          );
+        } else {
+          mostrarToast(`✓ ${data.estado || 'Enviado'}`, data.detalle, false);
+        }
+      } catch (err) {
+        cerrarModalNotificacion();
+        mostrarToast(
+          '⚠ Error de conexión',
+          'Asegúrate de tener app.py ejecutándose en http://127.0.0.1:5000.',
+          true
+        );
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send-fill"></i> Enviar notificación';
+      }
     }
 
     // ==========================================================================
@@ -1357,7 +1730,7 @@
       document.querySelectorAll('.counter').forEach(el => {
         const target = parseFloat(el.dataset.target);
         const decimals = parseInt(el.dataset.decimals || '2', 10);
-        const duration = 1100;
+        const duration = 900;
         const startTime = performance.now();
 
         function step(now) {
@@ -1374,20 +1747,18 @@
         document.querySelectorAll('.kpi-mini-fill').forEach(bar => {
           bar.style.width = bar.dataset.width;
         });
-      }, 120);
+      }, 100);
     }
 
     // ==========================================================================
-    // CAMBIO DE TEMA OSCURO / CLARO
+    // CAMBIO DE TEMA CLARO / OSCURO SOBRIO
     // ==========================================================================
     function alternarTema() {
-      document.body.classList.toggle('light-theme');
-      const isLight = document.body.classList.contains('light-theme');
-      document.getElementById('themeIcon').className = isLight ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
-      document.getElementById('themeText').textContent = isLight ? 'Modo Oscuro' : 'Modo Claro';
-      if (radarChartInstance) {
-        actualizarRadarDistrito(DISTRITOS_DATA.find(d => d.id === distritoSeleccionadoId));
-      }
+      document.body.classList.toggle('dark-theme');
+      const isDark = document.body.classList.contains('dark-theme');
+      document.getElementById('themeIcon').className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+      document.getElementById('themeText').textContent = isDark ? 'Modo Claro' : 'Modo Oscuro';
+      actualizarRadarDistritos(obtenerDistritosActivos());
     }
 
     // ==========================================================================
@@ -1417,19 +1788,31 @@
     }
 
     // ==========================================================================
-    // BARRAS DE PRECISIÓN IoU POR INDICADOR
+    // BARRAS DINÁMICAS DE COBERTURA DEL DISTRITO EN EL ESCÁNER (12 DISTRITOS)
     // ==========================================================================
-    function renderizarIouIndicadores() {
+    function renderizarBarrasDistritoEscaner(d) {
       const container = document.getElementById('indicatorIouContainer');
-      container.innerHTML = INDICADORES_IOU.map(item => `
-        <div style="display: grid; grid-template-columns: 110px 1fr 48px; align-items: center; gap: 0.6rem;"
-             onmousemove="mostrarTooltip(event, '<strong>${item.nombre}</strong><br>IoU del modelo: ${fmt(item.iou, 4)}')"
+      const tituloBox = document.getElementById('scannerDistTitle');
+      if (tituloBox) {
+        tituloBox.textContent = `Cobertura en ${d.nombre} (mIoU global: 0,6356)`;
+      }
+
+      const items = [
+        { nombre: "Vegetación", val: d.veg, ha: d.ha_veg, iouRef: "0,8192", color: "#2d6a4f" },
+        { nombre: "Superficie urb.", val: d.urb, ha: d.ha_urb, iouRef: "0,7402", color: "#b5483a" },
+        { nombre: "Vías", val: d.vias, ha: d.ha_vias, iouRef: "0,6032", color: "#5c677d" },
+        { nombre: "Suelo desc.", val: d.suelo, ha: d.ha_suelo, iouRef: "0,4232", color: "#c88a2b" }
+      ];
+
+      container.innerHTML = items.map(item => `
+        <div style="display: grid; grid-template-columns: 110px 1fr 54px; align-items: center; gap: 0.6rem;"
+             onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · ${item.nombre}</strong><br>${fmt(item.val)}% (${fmt(item.ha)} ha)<br>IoU validación modelo: ${item.iouRef}')"
              onmouseleave="ocultarTooltip()">
           <span style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary);">${item.nombre}</span>
-          <div style="height: 8px; background: rgba(148,163,184,0.15); border-radius: 99px; overflow: hidden;">
-            <div style="height: 100%; width: ${(item.iou * 100).toFixed(1)}%; background: ${item.color}; border-radius: 99px; box-shadow: 0 0 10px ${item.color};"></div>
+          <div style="height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden;">
+            <div style="height: 100%; width: ${item.val}%; background: ${item.color}; border-radius: 3px; transition: width 0.4s ease;"></div>
           </div>
-          <span class="num" style="font-size: 0.78rem; font-weight: 800; text-align: right;">${fmt(item.iou, 4)}</span>
+          <span class="num" style="font-size: 0.78rem; font-weight: 700; text-align: right;">${fmt(item.val)}%</span>
         </div>
       `).join('');
     }
@@ -1445,13 +1828,20 @@
 
     function crearHtmlFilaDistrito(d, rank) {
       const valorActivo = fmt(d[indicadorOrdenGrafico], 2) + '%';
+      const idxSel = distritosSeleccionados.indexOf(d.id);
+      const isSelected = idxSel !== -1;
+      const dotColor = isSelected ? COLORES_SELECCION[idxSel].border : 'transparent';
+
       return `
-        <div class="district-bar-row ${distritoSeleccionadoId === d.id ? 'selected' : ''}"
+        <div class="district-bar-row ${isSelected ? 'selected' : ''}"
              data-id="${d.id}"
              data-name="${d.nombre.toLowerCase()}"
-             onclick="seleccionarDistrito('${d.id}')">
+             onclick="seleccionarDistrito('${d.id}', event)">
           <div class="rank-badge num" data-rank="${d.id}">${rank}</div>
-          <div class="district-label">${d.nombre}</div>
+          <div class="district-label">
+            <span class="sel-dot" data-dot="${d.id}" style="background: ${dotColor}; display: ${isSelected && distritosSeleccionados.length > 1 ? 'inline-block' : 'none'};"></span>
+            <span>${d.nombre}</span>
+          </div>
           <div class="stacked-track">
             <div class="stack-seg seg-veg" style="width: ${d.veg}%;"
                  onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Vegetación</strong><br>${fmt(d.veg)} % (${fmt(d.ha_veg)} ha)')"
@@ -1506,7 +1896,7 @@
           el.style.transform = `translateY(${deltaY}px)`;
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              el.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+              el.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
               el.style.transform = 'translateY(0)';
             });
           });
@@ -1525,80 +1915,242 @@
         const match = tr.dataset.name.includes(q);
         tr.style.display = match ? '' : 'none';
       });
+
+      if (q.length > 0) {
+        const coincidencia = DISTRITOS_DATA.find(d => d.nombre.toLowerCase().includes(q));
+        if (coincidencia) {
+          seleccionarDistrito(coincidencia.id, null);
+        }
+      }
     }
 
     // ==========================================================================
-    // INSPECTOR DE DISTRITO + GRÁFICO RADAR INTERACTIVO
+    // SELECCIÓN ÚNICA O MÚLTIPLE CON CTRL+CLIC (HASTA 3 DISTRITOS)
     // ==========================================================================
-    function seleccionarDistrito(id) {
-      distritoSeleccionadoId = id;
-      const d = DISTRITOS_DATA.find(item => item.id === id);
-      if (!d) return;
+    function limpiarSeleccionMultiple() {
+      if (distritosSeleccionados.length > 1) {
+        distritosSeleccionados = [distritosSeleccionados[0]];
+        actualizarVistaSeleccion();
+      }
+    }
+
+    function seleccionarDistrito(id, evt = null) {
+      const esCtrl = evt && (evt.ctrlKey || evt.metaKey);
+
+      if (!esCtrl) {
+        distritosSeleccionados = [id];
+      } else {
+        const idx = distritosSeleccionados.indexOf(id);
+        if (idx !== -1) {
+          if (distritosSeleccionados.length > 1) {
+            distritosSeleccionados.splice(idx, 1);
+          }
+        } else {
+          if (distritosSeleccionados.length >= 3) {
+            mostrarToast(
+              'Máximo 3 distritos',
+              'Ya tienes 3 distritos seleccionados. Haz Ctrl + clic sobre uno marcado para quitarlo o clic normal para reiniciar.',
+              true
+            );
+            return;
+          }
+          distritosSeleccionados.push(id);
+        }
+      }
+
+      actualizarVistaSeleccion();
+    }
+
+    function actualizarVistaSeleccion() {
+      const activos = obtenerDistritosActivos();
+      if (!activos.length) return;
+
+      const totalSel = activos.length;
+
+      const badgeTop = document.getElementById('badgeTopCount');
+      if (badgeTop) badgeTop.textContent = `(${totalSel})`;
+
+      const statusLabel = document.getElementById('selectionStatusLabel');
+      if (statusLabel) {
+        statusLabel.textContent = totalSel === 1
+          ? '1 distrito seleccionado'
+          : `${totalSel}/3 distritos seleccionados`;
+      }
+
+      const btnLimpiar = document.getElementById('btnLimpiarMulti');
+      if (btnLimpiar) {
+        btnLimpiar.style.display = totalSel > 1 ? 'inline-block' : 'none';
+      }
 
       document.querySelectorAll('.district-bar-row').forEach(el => {
-        el.classList.toggle('selected', el.dataset.id === id);
+        const rowId = el.dataset.id;
+        const idxSel = distritosSeleccionados.indexOf(rowId);
+        const isSel = idxSel !== -1;
+        el.classList.toggle('selected', isSel);
+        el.style.borderColor = isSel ? COLORES_SELECCION[idxSel].border : 'transparent';
+
+        const dot = el.querySelector(`[data-dot="${rowId}"]`);
+        if (dot) {
+          if (isSel && totalSel > 1) {
+            dot.style.display = 'inline-block';
+            dot.style.background = COLORES_SELECCION[idxSel].border;
+          } else {
+            dot.style.display = 'none';
+          }
+        }
       });
 
       document.querySelectorAll('#districtTableBody tr').forEach(tr => {
-        tr.classList.toggle('active-row', tr.dataset.rowId === id);
+        const isSel = distritosSeleccionados.includes(tr.dataset.rowId);
+        tr.classList.toggle('active-row', isSel);
       });
 
-      document.getElementById('panelDistrictName').textContent = d.nombre;
-      document.getElementById('panelDistrictArea').textContent = `${fmt(d.area)} ha`;
+      const badgeInspector = document.getElementById('inspectorBadgeLabel');
+      const nameEl = document.getElementById('panelDistrictName');
+      const areaEl = document.getElementById('panelDistrictArea');
+      const cutsEl = document.getElementById('panelDistrictCuts');
+      const indicatorsContainer = document.getElementById('panelIndicatorsList');
 
-      const gauges = [
-        { label: "Vegetación", pct: d.veg, ha: d.ha_veg, color: "#10b981", icon: "bi-tree-fill" },
-        { label: "Vías", pct: d.vias, ha: d.ha_vias, color: "#94a3b8", icon: "bi-signpost-split-fill" },
-        { label: "Urbanizada", pct: d.urb, ha: d.ha_urb, color: "#ef4444", icon: "bi-buildings-fill" },
-        { label: "Suelo desc.", pct: d.suelo, ha: d.ha_suelo, color: "#f59e0b", icon: "bi-layers-fill" }
-      ];
+      if (totalSel === 1) {
+        const d = activos[0];
+        badgeInspector.textContent = 'Inspector de Distrito Activo';
+        nameEl.textContent = d.nombre;
+        areaEl.textContent = `${fmt(d.area)} ha`;
+        cutsEl.textContent = '20 recortes satelitales';
 
-      document.getElementById('panelIndicatorsList').innerHTML = gauges.map(g => `
-        <div class="gauge-box">
-          <div class="gauge-top">
-            <span><i class="bi ${g.icon} me-1" style="color: ${g.color};"></i>${g.label}</span>
-            <span class="gauge-ha num">${fmt(g.ha)} ha</span>
+        const gauges = [
+          { label: "Vegetación", pct: d.veg, ha: d.ha_veg, color: "#2d6a4f", icon: "bi-tree-fill" },
+          { label: "Vías", pct: d.vias, ha: d.ha_vias, color: "#5c677d", icon: "bi-signpost-split-fill" },
+          { label: "Urbanizada", pct: d.urb, ha: d.ha_urb, color: "#b5483a", icon: "bi-buildings-fill" },
+          { label: "Suelo desc.", pct: d.suelo, ha: d.ha_suelo, color: "#c88a2b", icon: "bi-layers-fill" }
+        ];
+
+        indicatorsContainer.innerHTML = gauges.map(g => `
+          <div class="gauge-box">
+            <div class="gauge-top">
+              <span><i class="bi ${g.icon} me-1" style="color: ${g.color};"></i>${g.label}</span>
+              <span class="gauge-ha num">${fmt(g.ha)} ha</span>
+            </div>
+            <div class="gauge-val num" style="color: ${g.color};">${fmt(g.pct)}%</div>
+            <div class="gauge-progress">
+              <div class="gauge-progress-bar" style="width: ${g.pct}%; background: ${g.color};"></div>
+            </div>
           </div>
-          <div class="gauge-val num" style="color: ${g.color};">${fmt(g.pct)}%</div>
-          <div class="gauge-progress">
-            <div class="gauge-progress-bar" style="width: ${g.pct}%; background: ${g.color};"></div>
+        `).join('');
+      } else {
+        const sumaArea = activos.reduce((acc, item) => acc + item.area, 0);
+        badgeInspector.textContent = `Inspector Comparativo (${totalSel} Distritos Activos)`;
+        nameEl.innerHTML = activos.map((d, idx) =>
+          `<span style="color: ${COLORES_SELECCION[idx].border};">${d.nombre}</span>`
+        ).join(' · ');
+        areaEl.textContent = `${fmt(sumaArea)} ha`;
+        cutsEl.textContent = `${totalSel * 20} recortes satelitales`;
+
+        const categorias = [
+          { key: "veg", haKey: "ha_veg", label: "Vegetación", icon: "bi-tree-fill", baseColor: "#2d6a4f" },
+          { key: "vias", haKey: "ha_vias", label: "Vías", icon: "bi-signpost-split-fill", baseColor: "#5c677d" },
+          { key: "urb", haKey: "ha_urb", label: "Urbanizada", icon: "bi-buildings-fill", baseColor: "#b5483a" },
+          { key: "suelo", haKey: "ha_suelo", label: "Suelo desc.", icon: "bi-layers-fill", baseColor: "#c88a2b" }
+        ];
+
+        indicatorsContainer.innerHTML = categorias.map(cat => `
+          <div class="gauge-box" style="padding: 0.55rem 0.7rem;">
+            <div class="gauge-top" style="margin-bottom: 0.35rem;">
+              <span><i class="bi ${cat.icon}" style="color: ${cat.baseColor};"></i> ${cat.label}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.32rem;">
+              ${activos.map((d, idx) => {
+                const col = COLORES_SELECCION[idx].border;
+                return `
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem;">
+                      <span style="font-weight: 700; color: ${col};">● ${d.nombre}</span>
+                      <span class="num" style="font-weight: 700;">${fmt(d[cat.key])}% <span style="font-weight: 400; color: var(--text-muted);">(${fmt(d[cat.haKey])} ha)</span></span>
+                    </div>
+                    <div class="gauge-progress" style="margin-top: 2px; height: 3px;">
+                      <div class="gauge-progress-bar" style="width: ${d[cat.key]}%; background: ${col};"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
           </div>
-        </div>
-      `).join('');
+        `).join('');
+      }
 
-      actualizarRadarDistrito(d);
+      actualizarRadarDistritos(activos);
 
-      // Si el distrito tiene recortes de verificación, mostrarlos con acceso directo al escáner
-      const muestras = MUESTRAS_VERIFICACION.filter(m => m.distrito === d.nombre);
+      const ultimoDistrito = activos[activos.length - 1];
+      renderizarBarrasDistritoEscaner(ultimoDistrito);
+
+      const muestras = MUESTRAS_VERIFICACION.filter(m => m.distrito === ultimoDistrito.nombre);
       const samplesContainer = document.getElementById('panelSamplesGrid');
+      const noticeEl = document.getElementById('sampleDistrictNotice');
+
       if (muestras.length > 0) {
+        seleccionarMuestraVerificacion(muestras[0].id);
+        if (noticeEl) {
+          noticeEl.textContent = `Mostrando recorte satelital correspondiente a ${ultimoDistrito.nombre}.`;
+        }
         samplesContainer.innerHTML = `
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             ${muestras.map(m => `
               <button type="button" class="btn-action" style="flex: 1; justify-content: center;" onclick="cargarMuestraEnCortinilla('${m.id}')">
-                <i class="bi bi-eye-fill text-success"></i> Ver ${m.corto} en Escáner
+                <i class="bi bi-eye"></i> Ver ${m.corto} en Escáner
               </button>
             `).join('')}
           </div>
         `;
       } else {
+        if (noticeEl) {
+          noticeEl.textContent = `${ultimoDistrito.nombre} no tiene recorte cargado en static/muestras/ (vista satelital de referencia).`;
+        }
         samplesContainer.innerHTML = '';
       }
     }
 
-    function actualizarRadarDistrito(d) {
+    function actualizarRadarDistritos(activos) {
       const ctx = document.getElementById('districtRadarChart').getContext('2d');
-      const isLight = document.body.classList.contains('light-theme');
-      const gridColor = isLight ? 'rgba(15, 23, 42, 0.1)' : 'rgba(255, 255, 255, 0.12)';
-      const labelColor = isLight ? '#334155' : '#cbd5e1';
+      const isDark = document.body.classList.contains('dark-theme');
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.1)';
+      const labelColor = isDark ? '#cbd5e1' : '#334155';
 
-      // Promedios de Lima Metropolitana
       const avgLima = [10.77, 13.12, 67.87, 8.24];
-      const distVals = [d.veg, d.vias, d.urb, d.suelo];
+
+      const datasets = activos.map((d, idx) => {
+        const pal = COLORES_SELECCION[idx] || COLORES_SELECCION[0];
+        return {
+          label: d.nombre,
+          data: [d.veg, d.vias, d.urb, d.suelo],
+          backgroundColor: pal.bg,
+          borderColor: pal.border,
+          pointBackgroundColor: pal.border,
+          borderWidth: 2
+        };
+      });
+
+      datasets.push({
+        label: 'Promedio Lima',
+        data: avgLima,
+        backgroundColor: 'rgba(100, 116, 139, 0.08)',
+        borderColor: '#64748b',
+        pointBackgroundColor: '#64748b',
+        borderDash: [4, 4],
+        borderWidth: 1.5
+      });
+
+      const legendEl = document.getElementById('radarLegendInline');
+      if (legendEl) {
+        const itemsHtml = activos.map((d, idx) => {
+          const col = (COLORES_SELECCION[idx] || COLORES_SELECCION[0]).border;
+          return `<span style="color: ${col};">● ${d.nombre}</span>`;
+        });
+        itemsHtml.push(`<span style="color: #64748b;">● Promedio</span>`);
+        legendEl.innerHTML = itemsHtml.join(' &nbsp; ');
+      }
 
       if (radarChartInstance) {
-        radarChartInstance.data.datasets[0].label = d.nombre;
-        radarChartInstance.data.datasets[0].data = distVals;
+        radarChartInstance.data.datasets = datasets;
         radarChartInstance.options.scales.r.grid.color = gridColor;
         radarChartInstance.options.scales.r.angleLines.color = gridColor;
         radarChartInstance.options.scales.r.pointLabels.color = labelColor;
@@ -1610,29 +2162,12 @@
         type: 'radar',
         data: {
           labels: ['% Vegetación', '% Vías', '% Urbanizada', '% Suelo desc.'],
-          datasets: [
-            {
-              label: d.nombre,
-              data: distVals,
-              backgroundColor: 'rgba(16, 185, 129, 0.25)',
-              borderColor: '#10b981',
-              pointBackgroundColor: '#10b981',
-              borderWidth: 2
-            },
-            {
-              label: 'Promedio Lima',
-              data: avgLima,
-              backgroundColor: 'rgba(148, 163, 184, 0.15)',
-              borderColor: '#94a3b8',
-              pointBackgroundColor: '#94a3b8',
-              borderDash: [4, 4],
-              borderWidth: 1.5
-            }
-          ]
+          datasets: datasets
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: { duration: 250 },
           plugins: {
             legend: { display: false }
           },
@@ -1668,31 +2203,31 @@
       });
 
       tbody.innerHTML = copia.map(d => `
-        <tr data-row-id="${d.id}" data-name="${d.nombre.toLowerCase()}" class="${distritoSeleccionadoId === d.id ? 'active-row' : ''}" onclick="seleccionarDistrito('${d.id}')" style="cursor: pointer;">
+        <tr data-row-id="${d.id}" data-name="${d.nombre.toLowerCase()}" class="${distritosSeleccionados.includes(d.id) ? 'active-row' : ''}" onclick="seleccionarDistrito('${d.id}', event)" style="cursor: pointer;">
           <td><strong>${d.nombre}</strong></td>
           <td class="num">${fmt(d.area)}</td>
           <td class="num">
             <div class="cell-bar-wrap">
-              <span class="cell-bar-bg" style="width: ${d.veg}%; background: rgba(16, 185, 129, 0.22);"></span>
-              <span class="cell-bar-val" style="color: #10b981;">${fmt(d.veg)}%</span>
+              <span class="cell-bar-bg" style="width: ${d.veg}%; background: rgba(45, 106, 79, 0.16);"></span>
+              <span class="cell-bar-val" style="color: #2d6a4f;">${fmt(d.veg)}%</span>
             </div>
           </td>
           <td class="num">
             <div class="cell-bar-wrap">
-              <span class="cell-bar-bg" style="width: ${d.vias}%; background: rgba(148, 163, 184, 0.22);"></span>
+              <span class="cell-bar-bg" style="width: ${d.vias}%; background: rgba(92, 103, 125, 0.16);"></span>
               <span class="cell-bar-val">${fmt(d.vias)}%</span>
             </div>
           </td>
           <td class="num">
             <div class="cell-bar-wrap">
-              <span class="cell-bar-bg" style="width: ${d.urb}%; background: rgba(239, 68, 68, 0.22);"></span>
-              <span class="cell-bar-val" style="color: #f87171;">${fmt(d.urb)}%</span>
+              <span class="cell-bar-bg" style="width: ${d.urb}%; background: rgba(181, 72, 58, 0.16);"></span>
+              <span class="cell-bar-val" style="color: #b5483a;">${fmt(d.urb)}%</span>
             </div>
           </td>
           <td class="num">
             <div class="cell-bar-wrap">
-              <span class="cell-bar-bg" style="width: ${d.suelo}%; background: rgba(245, 158, 11, 0.25);"></span>
-              <span class="cell-bar-val" style="color: #fbbf24;">${fmt(d.suelo)}%</span>
+              <span class="cell-bar-bg" style="width: ${d.suelo}%; background: rgba(200, 138, 43, 0.18);"></span>
+              <span class="cell-bar-val" style="color: #9c6819;">${fmt(d.suelo)}%</span>
             </div>
           </td>
         </tr>
@@ -1788,11 +2323,10 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       animarContadoresKPI();
-      renderizarIouIndicadores();
       construirFilasDistritosInicial();
       renderizarTablaDistritos();
       inicializarVerificacion();
-      seleccionarDistrito('san_isidro');
+      actualizarVistaSeleccion();
     });
   </script>
 </body>

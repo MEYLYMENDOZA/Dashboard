@@ -1,0 +1,24 @@
+REPORTE DE COBERTURA URBANA SATELITAL — URBANVISION LIMA
+==========================================================
+Fecha y hora: 22/11/2026 17:23:04
+Distritos seleccionados (3): San Isidro, San Borja, Chaclacayo
+
+* San Isidro (174.65 ha):
+  - Vegetación:            27.02% (47.19 ha)
+  - Vías:                  12.43% (21.7 ha)
+  - Superficie urbanizada: 60.11% (104.99 ha)
+  - Suelo descubierto:     0.44% (0.76 ha)
+
+* San Borja (175.71 ha):
+  - Vegetación:            22.22% (39.04 ha)
+  - Vías:                  15.91% (27.95 ha)
+  - Superficie urbanizada: 61.73% (108.46 ha)
+  - Suelo descubierto:     0.15% (0.26 ha)
+
+* Chaclacayo (176.91 ha):
+  - Vegetación:            18.24% (32.27 ha)
+  - Vías:                  3.85% (6.81 ha)
+  - Superficie urbanizada: 22.92% (40.55 ha)
+  - Suelo descubierto:     54.99% (97.27 ha)
+
+Modelo: U-Net + EfficientNet-B4 (mIoU global: 0,6356)
