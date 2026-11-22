@@ -964,6 +964,54 @@
       }
     }
   </style>
+
+<style id="layout-primera-imagen">
+  .dash-card > div:has(.district-bar-row):has(#panelDistrictName) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.38fr) minmax(0, 1fr) !important;
+    gap: 1.35rem !important;
+    align-items: start !important;
+  }
+  .dash-card > div:has(.district-bar-row):has(#panelDistrictName) > div {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  .district-bar-row {
+    display: grid !important;
+    grid-template-columns: 26px 142px minmax(0, 1fr) 56px !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+  }
+  #panelDistrictName {
+    font-size: 1.05rem !important;
+    line-height: 1.25 !important;
+  }
+  #panelIndicatorsList {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.55rem 1.1rem !important;
+  }
+  #panelIndicatorsList > div {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color, #e2e8f0) !important;
+    border-radius: 0 !important;
+    padding: 0.35rem 0 !important;
+    box-shadow: none !important;
+  }
+  #panelIndicatorsList + div {
+    background: transparent !important;
+    border: none !important;
+    padding: 0.4rem 0 0 0 !important;
+    box-shadow: none !important;
+  }
+  @media (max-width: 1024px) {
+    .dash-card > div:has(.district-bar-row):has(#panelDistrictName) {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 
