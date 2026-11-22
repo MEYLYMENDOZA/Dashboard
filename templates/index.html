@@ -1760,10 +1760,29 @@
         }
       } catch (err) {
         cerrarModalNotificacion();
+        const destInput = document.querySelector('#modalNotif input[type="email"], #notifDestinatario, #inputDestinatario, #modalNotif input');
+        const para = destInput ? destInput.value.trim() : '';
+        const idsActivos = Array.from(document.querySelectorAll('.district-bar-row.selected')).map(el => el.dataset.id);
+        const lista = (typeof DISTRITOS_DATA !== 'undefined')
+          ? (idsActivos.length ? DISTRITOS_DATA.filter(d => idsActivos.includes(d.id)) : [DISTRITOS_DATA[0]])
+          : [];
+        const fNum = v => Number(v || 0).toFixed(2).replace('.', ',');
+        const asunto = `Reporte UrbanVision Lima \u2014 ${lista.map(d => d.nombre).join(', ')}`;
+        const cuerpo = [
+          'Reporte de Cobertura Urbana Satelital \u2014 UrbanVision Lima',
+          'Modelo: U-Net + EfficientNet-B4 (mIoU global: 0,6356)',
+          '',
+          ...lista.map(d => `\u2022 ${d.nombre} (${fNum(d.area)} ha): Veg ${fNum(d.veg)}% (${fNum(d.ha_veg)} ha) | V\u00edas ${fNum(d.vias)}% (${fNum(d.ha_vias)} ha) | Urb ${fNum(d.urb)}% (${fNum(d.ha_urb)} ha) | Suelo ${fNum(d.suelo)}% (${fNum(d.ha_suelo)} ha)`),
+          '',
+          '(Pega aqu\u00ed con Ctrl + V el gr\u00e1fico comparativo copiado al portapapeles)'
+        ].join('\n');
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(para)}&su=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+        window.open(gmailUrl, '_blank');
+        if (typeof cerrarModalNotif === 'function') cerrarModalNotif();
         mostrarToast(
-          '⚠ Error de conexión',
-          'Asegúrate de tener app.py ejecutándose en http://127.0.0.1:5000.',
-          true
+          'Reporte listo en Gmail',
+          'Se abri\u00f3 Gmail con los datos rellenados. Presiona Ctrl + V en el mensaje para pegar el gr\u00e1fico.',
+          false
         );
       } finally {
         btn.disabled = false;
