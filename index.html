@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrbanVision Lima — Dashboard Interactivo de Cobertura Urbana</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       VARIABLES DE TEMA EDITORIAL / CARTOGRÁFICO (CLARO POR DEFECTO / OSCURO SOBRIO)
+       ========================================================================== */
+    :root {
+      --bg-main: #f4f6f8;
+      --bg-secondary: #e9edf2;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --bg-glass: #ffffff;
+      --text-primary: #18202c;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --border-color: #dce2ea;
+      --border-glow: #94a3b8;
+
+      /* Paleta cartográfica desaturada */
+      --c-veg: #2d6a4f;
+      --c-veg-dark: #1b4332;
+      --c-veg-glow: rgba(45, 106, 79, 0.12);
+
+      --c-vias: #5c677d;
+      --c-vias-dark: #334155;
+      --c-vias-glow: rgba(92, 103, 125, 0.12);
+
+      --c-urb: #b5483a;
+      --c-urb-dark: #8c3227;
+      --c-urb-glow: rgba(181, 72, 58, 0.12);
+
+      --c-suelo: #c88a2b;
+      --c-suelo-dark: #9c6819;
+      --c-suelo-glow: rgba(200, 138, 43, 0.12);
+
+      --accent-cyan: #2b6cb0;
+      --accent-indigo: #3b5998;
+      --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    }
+
+    body.dark-theme {
+      --bg-main: #12161f;
+      --bg-secondary: #1b2230;
+      --bg-card: #171c26;
+      --bg-card-hover: #1f2634;
+      --bg-glass: #171c26;
+      --text-primary: #edf2f7;
+      --text-secondary: #a0aec0;
+      --text-muted: #718096;
+      --border-color: #2b3545;
+      --border-glow: #4a5568;
+      --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.45;
+      font-size: 14px;
+      overflow-x: hidden;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ==========================================================================
+       ANIMACIONES SUTILES DE ENTRADA
+       ========================================================================== */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .anim-card {
+      animation: fadeSlideUp 0.35s ease-out both;
+    }
+    .delay-1 { animation-delay: 0.03s; }
+    .delay-2 { animation-delay: 0.06s; }
+    .delay-3 { animation-delay: 0.09s; }
+    .delay-4 { animation-delay: 0.12s; }
+
+    /* ==========================================================================
+       BARRA SUPERIOR (TOPBAR) LIMPIA
+       ========================================================================== */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background: #2d6a4f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 1.05rem;
+    }
+
+    .live-dot {
+      display: none;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .brand-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    /* Buscador rápido en topbar */
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 10px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .search-input {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.42rem 0.75rem 0.42rem 1.9rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      width: 200px;
+      transition: border-color 0.15s ease, width 0.15s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #2d6a4f;
+      width: 225px;
+    }
+
+    .btn-action {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.42rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-action:hover {
+      background: var(--bg-card-hover);
+      border-color: #94a3b8;
+    }
+
+    .btn-action.primary {
+      background: #2d6a4f;
+      border-color: #2d6a4f;
+      color: #ffffff;
+    }
+
+    .btn-action.primary:hover {
+      background: #23533e;
+    }
+
+    /* ==========================================================================
+       MODAL DE REMITENTE Y DESTINATARIO (SIN CONTRASEÑA Y SIN REDIRECCIÓN)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 1500;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+      animation: fadeSlideUp 0.2s ease-out;
+    }
+
+    .modal-header {
+      padding: 0.95rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 1.15rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 0.85rem 1.25rem;
+      background: var(--bg-main);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.58rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      font-family: inherit;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: #2d6a4f;
+    }
+
+    /* ==========================================================================
+       LAYOUT GENERAL DEL DASHBOARD
+       ========================================================================== */
+    .dashboard-container {
+      max-width: 1580px;
+      margin: 0 auto;
+      padding: 1.25rem 1.75rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    /* ==========================================================================
+       1. TARJETAS KPI SOBRIAS
+       ========================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.15s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: #94a3b8;
+    }
+
+    .kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.45rem;
+    }
+
+    .kpi-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .kpi-icon {
+      display: none;
+    }
+
+    .kpi-value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .kpi-footer {
+      margin-top: 0.6rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .kpi-mini-bar {
+      height: 4px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border-radius: 2px;
+      margin-top: 0.55rem;
+      overflow: hidden;
+    }
+
+    .kpi-mini-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--kpi-accent, #475569);
+      width: 0%;
+      transition: width 0.8s ease;
+    }
+
+    /* ==========================================================================
+       TARJETAS DE PANELES (DASH-CARD)
+       ========================================================================== */
+    .dash-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 0.95rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .card-badge-icon {
+      display: none;
+    }
+
+    .card-title {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    .card-body {
+      padding: 1.2rem 1.25rem;
+    }
+
+    /* Botonera interactiva tipo pestaña */
+    .pill-tabs {
+      display: inline-flex;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 0.2rem;
+      border-radius: 6px;
+      gap: 0.2rem;
+    }
+
+    .pill-tabs button {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.34rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .pill-tabs button:hover {
+      color: var(--text-primary);
+    }
+
+    .pill-tabs button.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Filtros de leyenda interactivos */
+    .legend-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .legend-btn {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      padding: 0.28rem 0.65rem;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: border-color 0.15s ease;
+    }
+
+    .legend-btn:hover {
+      border-color: #94a3b8;
+    }
+
+    .legend-btn.dimmed {
+      opacity: 0.35;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    /* ==========================================================================
+       2. PANEL CENTRAL: BARRAS APILADAS + INSPECTOR CON RADAR / GAUGES
+       ========================================================================== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .stacked-rows-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .district-bar-row {
+      display: grid;
+      grid-template-columns: 28px 168px 1fr 72px;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.42rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: transparent;
+      user-select: none;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .district-bar-row:hover {
+      background: var(--bg-secondary);
+    }
+
+    .district-bar-row.selected {
+      background: var(--bg-secondary);
+      border-color: #64748b;
+    }
+
+    .rank-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .district-bar-row.selected .rank-badge {
+      background: #1e293b;
+      color: #ffffff;
+    }
+
+    .district-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .sel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .stacked-track {
+      height: 20px;
+      width: 100%;
+      display: flex;
+      overflow: hidden;
+      border-radius: 3px;
+      background: var(--bg-secondary);
+      gap: 1px;
+    }
+
+    .stack-seg {
+      height: 100%;
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.15s ease;
+      position: relative;
+    }
+
+    .stack-seg:hover {
+      opacity: 0.85;
+    }
+
+    .seg-veg { background: var(--c-veg); }
+    .seg-vias { background: var(--c-vias); }
+    .seg-urb { background: var(--c-urb); }
+    .seg-suelo { background: var(--c-suelo); }
+
+    .district-metric-readout {
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-align: right;
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       PANEL INSPECTOR DE DISTRITO
+       ========================================================================== */
+    .inspector-card {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.15rem;
+    }
+
+    .inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .inspector-gauges {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .gauge-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.65rem 0.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gauge-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.2rem;
+    }
+
+    .gauge-val {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .gauge-ha {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+    }
+
+    .gauge-progress {
+      height: 4px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border-radius: 2px;
+      margin-top: 0.4rem;
+      overflow: hidden;
+    }
+
+    .gauge-progress-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .radar-box {
+      height: 225px;
+      position: relative;
+      margin: 0.5rem 0;
+    }
+
+    /* ==========================================================================
+       3. FILA DE 2 PANELES: TABLA INTERACTIVA + CORTINILLA SATELITAL
+       ========================================================================== */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 1.2rem;
+      align-items: stretch;
+    }
+
+    table.dash-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    table.dash-table th,
+    table.dash-table td {
+      padding: 0.56rem 0.7rem;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    table.dash-table th {
+      font-size: 0.71rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      user-select: none;
+    }
+
+    table.dash-table th.num,
+    table.dash-table td.num {
+      text-align: right;
+    }
+
+    table.dash-table tbody tr {
+      transition: background-color 0.15s ease;
+      user-select: none;
+    }
+
+    table.dash-table tbody tr:hover {
+      background-color: var(--bg-card-hover);
+    }
+
+    table.dash-table tbody tr.active-row {
+      background-color: var(--bg-secondary);
+      border-left: 3px solid #2d6a4f;
+    }
+
+    th.sortable {
+      cursor: pointer;
+    }
+
+    th.sortable:hover {
+      color: var(--text-primary);
+    }
+
+    .cell-bar-wrap {
+      position: relative;
+      padding: 0.18rem 0.45rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-width: 78px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .cell-bar-bg {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      right: 0;
+      border-radius: 2px;
+      z-index: 0;
+      transition: width 0.4s ease;
+    }
+
+    .cell-bar-val {
+      position: relative;
+      z-index: 1;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       VISOR DE CORTINILLA SATELITAL INTERACTIVA
+       ========================================================================== */
+    .sample-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .sample-pills button {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      padding: 0.28rem 0.6rem;
+      border-radius: 5px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .sample-pills button:hover {
+      color: var(--text-primary);
+      border-color: #94a3b8;
+    }
+
+    .sample-pills button.active {
+      background: #1e293b;
+      color: #ffffff;
+      border-color: #1e293b;
+    }
+
+    .trio-viewer {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .curtain-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      user-select: none;
+    }
+
+    .curtain-container img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .curtain-overlay-img {
+      clip-path: inset(0 0 0 50%);
+    }
+
+    .curtain-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: #ffffff;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.55);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .curtain-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .curtain-range {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      z-index: 5;
+    }
+
+    .mask-reference-box img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      display: block;
+    }
+
+    /* Chips de las 9 clases OpenEarthMap */
+    .oem-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .oem-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 6px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      transition: border-color 0.15s ease;
+    }
+
+    .oem-chip:hover {
+      border-color: #94a3b8;
+    }
+
+    .oem-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+
+    /* Tooltip flotante */
+    .tooltip-box {
+      position: fixed;
+      pointer-events: none;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      z-index: 1000;
+      display: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 1200px) {
+      .main-grid,
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .district-bar-row {
+        grid-template-columns: 26px 125px 1fr 62px;
+      }
+      .trio-viewer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tooltip interactivo -->
+  <div id="globalTooltip" class="tooltip-box" role="status" aria-live="polite"></div>
+
+  <!-- Notificación flotante (Toast) -->
+  <div id="toastNotif" role="status" aria-live="polite" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    max-width: 430px;
+    background: #18202c;
+    color: #ffffff;
+    border-left: 4px solid #2d6a4f;
+    padding: 0.9rem 1.05rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+    z-index: 2000;
+    display: none;
+  "></div>
+
+  <!-- ========================================================================
+       VENTANA DE REMITENTE Y DESTINATARIO (SIN CONTRASEÑA Y SIN REDIRECCIÓN)
+       ======================================================================== -->
+  <div id="notifModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalNotifTitle" onclick="if(event.target===this) cerrarModalNotificacion()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.55rem;">
+          <i class="bi bi-send-check-fill" style="color: #2d6a4f; font-size: 1.1rem;"></i>
+          <h3 id="modalNotifTitle" style="font-size: 0.98rem; font-weight: 700;">Enviar Notificación de Cobertura</h3>
+        </div>
+        <button type="button" onclick="cerrarModalNotificacion()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.25rem; cursor: pointer;" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <label for="modalRemitenteInput" style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-primary);">
+            ¿Quién envía esta notificación? (Correo remitente)
+          </label>
+          <input type="email" id="modalRemitenteInput" class="modal-input" placeholder="tu.correo@gmail.com" onkeydown="if(event.key==='Enter') document.getElementById('modalDestinatarioInput').focus()">
+        </div>
+
+        <div>
+          <label for="modalDestinatarioInput" style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-primary);">
+            ¿A quién le llega esta notificación? (Correo destinatario)
+          </label>
+          <input type="email" id="modalDestinatarioInput" class="modal-input" placeholder="destinatario@correo.com" onkeydown="if(event.key==='Enter') confirmarEnvioNotificacion()">
+        </div>
+
+        <!-- Vista previa de los 1–3 distritos seleccionados + sus barras + gráfico del Inspector -->
+        <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.8rem; font-size: 0.78rem;">
+          <div style="font-weight: 700; color: #2d6a4f; margin-bottom: 0.45rem;" id="modalPreviewDistrito">
+            Distritos seleccionados (1): San Isidro
+          </div>
+          <div id="modalPreviewBarras" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+
+          <div style="margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 0.71rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.35rem;">
+              Gráfico adjunto: Inspector de Distrito Activo
+            </div>
+            <img id="modalRadarPreview" src="" alt="Vista previa del gráfico del Inspector" style="max-height: 155px; width: auto; border-radius: 4px; border: 1px solid var(--border-color); background: #ffffff; padding: 4px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a href="/ultimo-reporte" target="_blank" class="btn-action" style="text-decoration: none; font-size: 0.74rem;" title="Ver último reporte HTML generado">
+          <i class="bi bi-file-earmark-richtext"></i> Ver último reporte
+        </a>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn-action" onclick="cerrarModalNotificacion()">Cancelar</button>
+          <button type="button" class="btn-action primary" id="btnConfirmarEnvio" onclick="confirmarEnvioNotificacion()">
+            <i class="bi bi-send-fill"></i> Enviar notificación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       BARRA SUPERIOR DE DASHBOARD INTERACTIVO
+       ======================================================================== -->
+  <nav class="topbar">
+    <div class="brand-area">
+      <div class="brand-logo">
+        <i class="bi bi-layers-half"></i>
+      </div>
+      <div>
+        <div class="brand-title">UrbanVision Lima</div>
+        <div class="brand-subtitle">
+          <span class="live-dot"></span>
+          Segmentación Semántica Satelital · 12 Distritos · 240 Imágenes
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-controls">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" id="districtSearchInput" class="search-input" placeholder="Buscar distrito..." oninput="filtrarDistritoPorTexto(this.value)">
+      </div>
+
+      <button type="button" class="btn-action" onclick="alternarTema()" id="btnThemeToggle" title="Cambiar modo oscuro / claro">
+        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+        <span id="themeText">Modo Oscuro</span>
+      </button>
+
+      <button type="button" class="btn-action" onclick="descargarCSV('tabla_porcentajes.csv')">
+        <i class="bi bi-download"></i> CSV %
+      </button>
+
+      <button type="button" class="btn-action" onclick="descargarCSV('indicadores_por_distrito.csv')">
+        <i class="bi bi-file-earmark-spreadsheet"></i> CSV Completo (ha)
+      </button>
+
+      <button type="button" class="btn-action primary" onclick="abrirModalNotificacion()" id="btnTopSendNotif">
+        <i class="bi bi-bell-fill"></i> Enviar Notif. <span id="badgeTopCount">(1)</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================================================
+       CONTENIDO PRINCIPAL DEL DASHBOARD
+       ======================================================================== -->
+  <main class="dashboard-container">
+
+    <!-- 1. TARJETAS KPI CON CONTADORES -->
+    <div class="kpi-grid">
+      <div class="kpi-card anim-card delay-1" style="--kpi-accent: #2b6cb0;">
+        <div class="kpi-top">
+          <span class="kpi-label">Superficie Clasificada</span>
+          <div class="kpi-icon"><i class="bi bi-bounding-box-circles"></i></div>
+        </div>
+        <div class="kpi-value num"><span class="counter" data-target="2115.19" data-decimals="2">0</span> <span style="font-size: 1rem; font-weight: 600; color: var(--text-secondary);">ha</span></div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="96%"></div></div>
+        <div class="kpi-footer">
+          <span>240 recortes GeoTIFF</span>
+          <strong>0,292 m/px</strong>
+        </div>
+      </div>
+
+      <div class="kpi-card anim-card delay-2" style="--kpi-accent: #2d6a4f;">
+        <div class="kpi-top">
+          <span class="kpi-label">Líder Cobertura Vegetal</span>
+          <div class="kpi-icon"><i class="bi bi-tree-fill"></i></div>
+        </div>
+        <div class="kpi-value num" style="color: #2d6a4f;"><span class="counter" data-target="27.02" data-decimals="2">0</span>%</div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="82%"></div></div>
+        <div class="kpi-footer">
+          <span>Máx: <strong>San Isidro</strong> (47,19 ha)</span>
+          <span>Prom: <strong>10,77%</strong></span>
+        </div>
+      </div>
+
+      <div class="kpi-card anim-card delay-3" style="--kpi-accent: #b5483a;">
+        <div class="kpi-top">
+          <span class="kpi-label">Superficie Urbanizada</span>
+          <div class="kpi-icon"><i class="bi bi-buildings-fill"></i></div>
+        </div>
+        <div class="kpi-value num" style="color: #b5483a;"><span class="counter" data-target="67.87" data-decimals="2">0</span>%</div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="68%"></div></div>
+        <div class="kpi-footer">
+          <span>Total: <strong>1 437,43 ha</strong></span>
+          <span>Máx: <strong>Cercado (81,89%)</strong></span>
+        </div>
+      </div>
+
+      <div class="kpi-card anim-card delay-4" style="--kpi-accent: #3b5998;">
+        <div class="kpi-top">
+          <span class="kpi-label">Precisión del Modelo (mIoU)</span>
+          <div class="kpi-icon"><i class="bi bi-cpu-fill"></i></div>
+        </div>
+        <div class="kpi-value num"><span class="counter" data-target="0.6356" data-decimals="4">0</span></div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="78%"></div></div>
+        <div class="kpi-footer">
+          <span>U-Net + EfficientNet-B4</span>
+          <strong>IoU Veg: 0,8192</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. PANEL CENTRAL: RANKING INTERACTIVO APILADO + INSPECTOR DINÁMICO CON RADAR -->
+    <div class="dash-card anim-card delay-2">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-badge-icon"><i class="bi bi-bar-chart-steps"></i></div>
+          <div>
+            <h2 class="card-title">Distribución Interactiva de Cobertura por Distrito</h2>
+            <div class="card-subtitle">
+              Haz clic en un distrito o mantén <strong>Ctrl + clic</strong> para seleccionar hasta <strong>3 distritos</strong>
+              · <span id="selectionStatusLabel" style="color: #2d6a4f; font-weight: 700;">1 distrito seleccionado</span>
+              <button type="button" id="btnLimpiarMulti" onclick="limpiarSeleccionMultiple()" style="display: none; margin-left: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); border-radius: 4px; padding: 1px 6px; font-size: 0.72rem; cursor: pointer;">
+                Dejar solo 1
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap;">
+          <!-- Leyenda interactiva con filtro -->
+          <div class="legend-pills">
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('veg')">
+              <span class="legend-dot" style="background: #2d6a4f;"></span>Vegetación
+            </button>
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('vias')">
+              <span class="legend-dot" style="background: #5c677d;"></span>Vías
+            </button>
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('urb')">
+              <span class="legend-dot" style="background: #b5483a;"></span>Urbanizada
+            </button>
+            <button type="button" class="legend-btn" onclick="ordenarDistritosAnimado('suelo')">
+              <span class="legend-dot" style="background: #c88a2b;"></span>Suelo desc.
+            </button>
+          </div>
+
+          <!-- Selector de ordenamiento animado -->
+          <div class="pill-tabs" role="group" aria-label="Ordenar distritos">
+            <button type="button" class="active" data-sort="veg" onclick="ordenarDistritosAnimado('veg')">
+              <i class="bi bi-tree"></i> % Veg.
+            </button>
+            <button type="button" data-sort="vias" onclick="ordenarDistritosAnimado('vias')">
+              <i class="bi bi-signpost-2"></i> % Vías
+            </button>
+            <button type="button" data-sort="urb" onclick="ordenarDistritosAnimado('urb')">
+              <i class="bi bi-buildings"></i> % Urb.
+            </button>
+            <button type="button" data-sort="suelo" onclick="ordenarDistritosAnimado('suelo')">
+              <i class="bi bi-layers"></i> % Suelo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="main-grid">
+          <!-- Columna izquierda: Barras apiladas con animación FLIP -->
+          <div id="stackedRowsContainer" class="stacked-rows-container"></div>
+
+          <!-- Columna derecha: Inspector interactivo del distrito seleccionado con Radar Chart.js -->
+          <aside class="inspector-card" aria-live="polite">
+            <div class="inspector-header">
+              <div>
+                <div id="inspectorBadgeLabel" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #2d6a4f; font-weight: 700;">
+                  Inspector de Distrito Activo
+                </div>
+                <h3 id="panelDistrictName" style="font-size: 1.25rem; font-weight: 700; margin-top: 0.1rem;">San Isidro</h3>
+              </div>
+              <div style="text-align: right; flex-shrink: 0;">
+                <span id="panelDistrictArea" class="num" style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">174,65 ha</span>
+                <div id="panelDistrictCuts" style="font-size: 0.72rem; color: var(--text-secondary);">20 recortes satelitales</div>
+              </div>
+            </div>
+
+            <!-- 4 Tarjetas Gauge del distrito -->
+            <div id="panelIndicatorsList" class="inspector-gauges"></div>
+
+            <!-- Gráfico Radar Comparativo: Distrito vs Promedio Lima -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.25rem;">
+                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">Perfil vs. Promedio Lima</span>
+                <span id="radarLegendInline" style="font-size: 0.71rem; font-weight: 600;"></span>
+              </div>
+              <div class="radar-box">
+                <canvas id="districtRadarChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Miniaturas rápidas del distrito -->
+            <div id="panelSamplesGrid" style="margin-top: 0.85rem;"></div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. FILA INFERIOR: TABLA INTERACTIVA CON BARRAS DE COLOR + CORTINILLA SATELITAL -->
+    <div class="bottom-grid">
+
+      <!-- Tabla de Métricas por Distrito -->
+      <div class="dash-card anim-card delay-3">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-badge-icon"><i class="bi bi-table"></i></div>
+            <div>
+              <h2 class="card-title">Tabla Comparativa Interactiva</h2>
+              <div class="card-subtitle">Haz clic en cualquier encabezado para ordenar o en una fila (<strong>Ctrl + clic</strong> hasta 3)</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div style="overflow-x: auto;">
+            <table class="dash-table" id="districtTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-col="nombre" onclick="ordenarTabla('nombre')">Distrito</th>
+                  <th class="num sortable" data-col="area" onclick="ordenarTabla('area')">Área (ha)</th>
+                  <th class="num sortable desc" data-col="veg" onclick="ordenarTabla('veg')">% Vegetación</th>
+                  <th class="num sortable" data-col="vias" onclick="ordenarTabla('vias')">% Vías</th>
+                  <th class="num sortable" data-col="urb" onclick="ordenarTabla('urb')">% Urbanizada</th>
+                  <th class="num sortable" data-col="suelo" onclick="ordenarTabla('suelo')">% Suelo</th>
+                </tr>
+              </thead>
+              <tbody id="districtTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visor Satelital de Cortinilla Píxel a Píxel -->
+      <div class="dash-card anim-card delay-4" id="panel-verificacion">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-badge-icon"><i class="bi bi-sliders"></i></div>
+            <div>
+              <h2 class="card-title">Escáner Satelital Píxel a Píxel (Cortinilla)</h2>
+              <div class="card-subtitle">Arrastra el divisor central para contrastar imagen satelital y máscara</div>
+            </div>
+          </div>
+          <div id="sampleSelector" class="sample-pills"></div>
+        </div>
+
+        <div class="card-body">
+          <div class="trio-viewer">
+            <!-- Cortinilla deslizante -->
+            <div>
+              <div class="curtain-container" id="curtainBox">
+                <img id="curtainImgOrig" src="" alt="Imagen satelital original">
+                <img id="curtainImgOver" class="curtain-overlay-img" src="" alt="Superposición predicha">
+                <div id="curtainDivider" class="curtain-divider"></div>
+                <div id="curtainHandle" class="curtain-handle"><i class="bi bi-arrows-expand" style="transform: rotate(90deg);"></i></div>
+                <input type="range" min="0" max="100" value="50" class="curtain-range" id="curtainSlider" aria-label="Deslizar cortinilla" oninput="actualizarCortinilla(this.value)">
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.45rem; font-weight: 600;">
+                <span>Captura Satelital</span>
+                <span style="color: #2d6a4f;">Predicción Superpuesta</span>
+              </div>
+            </div>
+
+            <!-- Máscara de clasificación pura + Barras dinámicas del distrito seleccionado -->
+            <div class="mask-reference-box">
+              <img id="curtainImgMask" src="" alt="Máscara de segmentación">
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 0.45rem 0 0.25rem;" id="sampleCaption">
+                Máscara de 9 clases
+              </div>
+              <div id="sampleDistrictNotice" style="font-size: 0.73rem; color: var(--text-secondary); margin-bottom: 0.65rem;"></div>
+
+              <!-- Barras dinámicas del distrito seleccionado -->
+              <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem;">
+                <div id="scannerDistTitle" style="font-size: 0.71rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                  Cobertura en San Isidro (mIoU global: 0,6356)
+                </div>
+                <div id="indicatorIouContainer" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 4. PALETA INTERACTIVA DE LAS 9 CLASES OPENEARTHMAP -->
+    <div class="dash-card anim-card delay-4">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-badge-icon"><i class="bi bi-palette-fill"></i></div>
+          <div>
+            <h2 class="card-title">Paleta Oficial de Clases de Segmentación (OpenEarthMap)</h2>
+            <div class="card-subtitle">Codificación RGB de las 9 clases detectadas por la red neuronal</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="oemLegendGrid" class="oem-chips-grid"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       LÓGICA INTERACTIVA: CTRL+CLIC (HASTA 3), INSPECTOR COMPARATIVO Y ENVÍO DIRECTO
+       ======================================================================== -->
+  <script>
+    const BASE_STATIC = (window.location.protocol === 'file:' && window.location.pathname.includes('/templates/'))
+      ? '../static/'
+      : 'static/';
+
+    const DISTRITOS_DATA = [
+      { id: "san_isidro", nombre: "San Isidro", area: 174.65, veg: 27.02, vias: 12.43, urb: 60.11, suelo: 0.44, ha_veg: 47.19, ha_vias: 21.70, ha_urb: 104.99, ha_suelo: 0.76, px_tot: 20971520, px_clas: 20483415 },
+      { id: "san_borja", nombre: "San Borja", area: 175.71, veg: 22.22, vias: 15.91, urb: 61.73, suelo: 0.15, ha_veg: 39.04, ha_vias: 27.95, ha_urb: 108.46, ha_suelo: 0.26, px_tot: 20971520, px_clas: 20607695 },
+      { id: "chaclacayo", nombre: "Chaclacayo", area: 176.91, veg: 18.24, vias: 3.85, urb: 22.92, suelo: 54.99, ha_veg: 32.27, ha_vias: 6.81, ha_urb: 40.55, ha_suelo: 97.27, px_tot: 20971520, px_clas: 20748236 },
+      { id: "miraflores", nombre: "Miraflores", area: 178.58, veg: 11.15, vias: 13.98, urb: 74.87, suelo: 0.01, ha_veg: 19.91, ha_vias: 24.96, ha_urb: 133.70, ha_suelo: 0.01, px_tot: 20971520, px_clas: 20944925 },
+      { id: "comas", nombre: "Comas", area: 178.64, veg: 10.33, vias: 17.48, urb: 71.29, suelo: 0.91, ha_veg: 18.45, ha_vias: 31.22, ha_urb: 127.35, ha_suelo: 1.62, px_tot: 20971520, px_clas: 20951416 },
+      { id: "los_olivos", nombre: "Los Olivos", area: 178.75, veg: 9.63, vias: 17.87, urb: 72.41, suelo: 0.10, ha_veg: 17.21, ha_vias: 31.93, ha_urb: 129.43, ha_suelo: 0.18, px_tot: 20971520, px_clas: 20964876 },
+      { id: "surco", nombre: "Santiago de Surco", area: 176.21, veg: 7.16, vias: 13.51, urb: 76.08, suelo: 3.25, ha_veg: 12.62, ha_vias: 23.81, ha_urb: 134.05, ha_suelo: 5.72, px_tot: 20971520, px_clas: 20665986 },
+      { id: "ves", nombre: "Villa El Salvador", area: 178.60, veg: 6.00, vias: 14.34, urb: 78.03, suelo: 1.63, ha_veg: 10.72, ha_vias: 25.62, ha_urb: 139.36, ha_suelo: 2.91, px_tot: 20971520, px_clas: 20947092 },
+      { id: "sjl", nombre: "San Juan de Lurigancho", area: 178.02, veg: 4.83, vias: 13.34, urb: 79.71, suelo: 2.12, ha_veg: 8.60, ha_vias: 23.75, ha_urb: 141.90, ha_suelo: 3.77, px_tot: 20971520, px_clas: 20878755 },
+      { id: "ate", nombre: "Ate", area: 177.20, veg: 4.80, vias: 10.70, urb: 74.11, suelo: 10.39, ha_veg: 8.50, ha_vias: 18.96, ha_urb: 131.33, ha_suelo: 18.41, px_tot: 20971520, px_clas: 20782906 },
+      { id: "ancon", nombre: "Ancón", area: 163.24, veg: 4.39, vias: 9.57, urb: 61.28, suelo: 24.76, ha_veg: 7.16, ha_vias: 15.62, ha_urb: 100.04, ha_suelo: 40.42, px_tot: 20971520, px_clas: 19145391 },
+      { id: "cercado", nombre: "Cercado de Lima", area: 178.67, veg: 3.52, vias: 14.50, urb: 81.89, suelo: 0.08, ha_veg: 6.30, ha_vias: 25.91, ha_urb: 146.32, ha_suelo: 0.15, px_tot: 20971520, px_clas: 20954883 }
+    ];
+
+    const COLORES_SELECCION = [
+      { border: "#2d6a4f", bg: "rgba(45, 106, 79, 0.18)" },
+      { border: "#2b6cb0", bg: "rgba(43, 108, 176, 0.16)" },
+      { border: "#b5483a", bg: "rgba(181, 72, 58, 0.16)" }
+    ];
+
+    const CLASES_OEM = [
+      { nombre: "Tree", rgb: "34, 97, 38", hex: "rgb(34, 97, 38)", indicador: "Vegetación" },
+      { nombre: "Rangeland", rgb: "0, 255, 36", hex: "rgb(0, 255, 36)", indicador: "Vegetación" },
+      { nombre: "Road", rgb: "255, 255, 255", hex: "rgb(255, 255, 255)", indicador: "Vías" },
+      { nombre: "Building", rgb: "222, 31, 7", hex: "rgb(222, 31, 7)", indicador: "Superficie urbanizada" },
+      { nombre: "Developed space", rgb: "148, 148, 148", hex: "rgb(148, 148, 148)", indicador: "Superficie urbanizada" },
+      { nombre: "Bareland", rgb: "128, 0, 0", hex: "rgb(128, 0, 0)", indicador: "Suelo descubierto" },
+      { nombre: "Water", rgb: "0, 69, 255", hex: "rgb(0, 69, 255)", indicador: "Agua / Litoral" },
+      { nombre: "Agriculture land", rgb: "75, 181, 73", hex: "rgb(75, 181, 73)", indicador: "Agrícola" },
+      { nombre: "Background", rgb: "0, 0, 0", hex: "rgb(0, 0, 0)", indicador: "Fondo" }
+    ];
+
+    const MUESTRAS_VERIFICACION = [
+      { id: "san_borja_003", distrito: "San Borja", corto: "San Borja 003", titulo: "San Borja — San Borja_003.tif" },
+      { id: "san_borja_006", distrito: "San Borja", corto: "San Borja 006", titulo: "San Borja — San Borja_006.tif" },
+      { id: "ves_005", distrito: "Villa El Salvador", corto: "VES 005", titulo: "Villa El Salvador — VES_005.tif" },
+      { id: "ves_004", distrito: "Villa El Salvador", corto: "VES 004", titulo: "Villa El Salvador — VES_004.tif" },
+      { id: "ancon_015", distrito: "Ancón", corto: "Ancón 015", titulo: "Ancón — Ancon_015.tif" },
+      { id: "ancon_009", distrito: "Ancón", corto: "Ancón 009", titulo: "Ancón — Ancon_009.tif" }
+    ];
+
+    let indicadorOrdenGrafico = 'veg';
+    let distritosSeleccionados = ['san_isidro'];
+    let estadoOrdenTabla = { col: 'veg', dir: 'desc' };
+    let radarChartInstance = null;
+
+    function fmt(num, decimales = 2) {
+      return Number(num).toFixed(decimales).replace('.', ',');
+    }
+
+    function obtenerDistritosActivos() {
+      return distritosSeleccionados
+        .map(id => DISTRITOS_DATA.find(item => item.id === id))
+        .filter(Boolean);
+    }
+
+    // Exporta el gráfico Radar siempre nítido sobre fondo blanco (incluso en Modo Oscuro)
+    function capturarImagenRadar() {
+      if (!radarChartInstance || !radarChartInstance.canvas) return '';
+      const srcCanvas = radarChartInstance.canvas;
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = srcCanvas.width;
+      exportCanvas.height = srcCanvas.height;
+      const ctx = exportCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+      ctx.drawImage(srcCanvas, 0, 0);
+      return exportCanvas.toDataURL('image/png', 1.0);
+    }
+
+    // Genera una imagen PNG nítida con las barras de los distritos seleccionados + el gráfico Radar
+    async function generarImagenReporteCompleto(activos, radarBase64, remitente, correo) {
+      let radarImg = null;
+      if (radarBase64) {
+        radarImg = await new Promise(resolve => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = radarBase64;
+        });
+      }
+
+      const scale = 2;
+      const W = 680;
+      const headerH = 74;
+      const cardH = 84;
+      const gap = 10;
+      const radarH = radarImg ? 315 : 0;
+      const footerH = 34;
+      const H = headerH + 16 + activos.length * (cardH + gap) + radarH + footerH;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = W * scale;
+      canvas.height = H * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+
+      // Fondo general
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, W, H);
+
+      // Encabezado
+      ctx.fillStyle = '#2d6a4f';
+      ctx.fillRect(0, 0, W, headerH);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillText('UrbanVision Lima — Reporte de Cobertura Urbana Satelital', 20, 27);
+      ctx.font = '11.5px Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillText(`De: ${remitente}  ·  Para: ${correo}`, 20, 46);
+      ctx.fillText(`Distritos seleccionados (${activos.length}/3): ${activos.map(d => d.nombre).join(', ')}`, 20, 62);
+
+      const acentos = ['#2d6a4f', '#2b6cb0', '#b5483a'];
+      let y = headerH + 16;
+
+      activos.forEach((d, idx) => {
+        const x = 20;
+        const cw = W - 40;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#dce2ea';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(x, y, cw, cardH, 6);
+        } else {
+          ctx.rect(x, y, cw, cardH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Acento lateral
+        ctx.fillStyle = acentos[idx % acentos.length];
+        ctx.fillRect(x, y + 4, 4, cardH - 8);
+
+        // Nombre y hectáreas
+        ctx.fillStyle = '#18202c';
+        ctx.font = 'bold 14px Arial, sans-serif';
+        ctx.fillText(d.nombre, x + 16, y + 22);
+
+        const areaTxt = `${fmt(d.area)} ha`;
+        ctx.fillStyle = '#334155';
+        ctx.fillText(areaTxt, x + cw - ctx.measureText(areaTxt).width - 16, y + 22);
+
+        // Barra apilada de 4 indicadores
+        const bx = x + 16;
+        const by = y + 32;
+        const bw = cw - 32;
+        const bh = 16;
+        const segs = [
+          { pct: Number(d.veg) || 0, color: '#2d6a4f' },
+          { pct: Number(d.vias) || 0, color: '#5c677d' },
+          { pct: Number(d.urb) || 0, color: '#b5483a' },
+          { pct: Number(d.suelo) || 0, color: '#c88a2b' }
+        ];
+        let curX = bx;
+        segs.forEach(s => {
+          const sw = (s.pct / 100) * bw;
+          if (sw > 0) {
+            ctx.fillStyle = s.color;
+            ctx.fillRect(curX, by, sw, bh);
+            curX += sw;
+          }
+        });
+
+        // Leyenda numérica
+        ctx.fillStyle = '#334155';
+        ctx.font = '11.5px Arial, sans-serif';
+        ctx.fillText(
+          `Veg: ${fmt(d.veg)}% (${fmt(d.ha_veg)} ha) · Vías: ${fmt(d.vias)}% (${fmt(d.ha_vias)} ha) · Urb: ${fmt(d.urb)}% (${fmt(d.ha_urb)} ha) · Suelo: ${fmt(d.suelo)}% (${fmt(d.ha_suelo)} ha)`,
+          x + 16,
+          y + 66
+        );
+
+        y += cardH + gap;
+      });
+
+      // Gráfico Radar del Inspector
+      if (radarImg) {
+        ctx.fillStyle = '#334155';
+        ctx.font = 'bold 12px Arial, sans-serif';
+        const tit = 'GRÁFICO ADJUNTO: INSPECTOR DE DISTRITO ACTIVO';
+        ctx.fillText(tit, (W - ctx.measureText(tit).width) / 2, y + 18);
+
+        const boxX = 60;
+        const boxY = y + 27;
+        const boxW = W - 120;
+        const boxH = 270;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#dce2ea';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+        } else {
+          ctx.rect(boxX, boxY, boxW, boxH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        const ratio = Math.min((boxW - 24) / radarImg.width, (boxH - 20) / radarImg.height);
+        const dw = radarImg.width * ratio;
+        const dh = radarImg.height * ratio;
+        ctx.drawImage(radarImg, boxX + (boxW - dw) / 2, boxY + (boxH - dh) / 2, dw, dh);
+
+        y += radarH;
+      }
+
+      // Pie de reporte
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px Arial, sans-serif';
+      ctx.fillText('Modelo: U-Net + EfficientNet-B4 (mIoU global: 0,6356) · Estudio satelital Lima Metropolitana', 20, y + 20);
+
+      return await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    }
+
+    // ==========================================================================
+    // MODAL DE REMITENTE Y DESTINATARIO (SIN CONTRASEÑA Y SIN REDIRECCIÓN)
+    // ==========================================================================
+    function mostrarToast(titulo, cuerpo, esError = false) {
+      const toast = document.getElementById('toastNotif');
+      toast.style.borderLeftColor = esError ? '#b5483a' : '#2d6a4f';
+      toast.innerHTML = `<div style="font-weight: 700; margin-bottom: 0.2rem;">${titulo}</div><div style="color: #cbd5e1;">${cuerpo}</div>`;
+      toast.style.display = 'block';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.style.display = 'none';
+      }, 7500);
+    }
+
+    function abrirModalNotificacion() {
+      const activos = obtenerDistritosActivos();
+      const nombres = activos.map(d => d.nombre).join(', ');
+      document.getElementById('modalPreviewDistrito').textContent =
+        `Distritos seleccionados (${activos.length}/3): ${nombres}`;
+
+      document.getElementById('modalPreviewBarras').innerHTML = activos.map((d, idx) => {
+        const pal = COLORES_SELECCION[idx] || COLORES_SELECCION[0];
+        return `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-left: 3px solid ${pal.border}; border-radius: 5px; padding: 0.5rem 0.65rem;">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.3rem;">
+              <span>${d.nombre}</span>
+              <span class="num" style="color: var(--text-secondary);">${fmt(d.area)} ha</span>
+            </div>
+            <div style="height: 12px; width: 100%; display: flex; border-radius: 3px; overflow: hidden; background: var(--bg-secondary);">
+              <div style="width: ${d.veg}%; background: #2d6a4f;"></div>
+              <div style="width: ${d.vias}%; background: #5c677d;"></div>
+              <div style="width: ${d.urb}%; background: #b5483a;"></div>
+              <div style="width: ${d.suelo}%; background: #c88a2b;"></div>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.3rem;">
+              Veg: <strong>${fmt(d.veg)}%</strong> · Vías: <strong>${fmt(d.vias)}%</strong> · Urb: <strong>${fmt(d.urb)}%</strong> · Suelo: <strong>${fmt(d.suelo)}%</strong>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const radarImg = document.getElementById('modalRadarPreview');
+      if (radarChartInstance && radarImg) {
+        radarImg.src = capturarImagenRadar();
+      }
+
+      const remitenteGuardado = localStorage.getItem('uv_remitente_correo') || '';
+      const remInput = document.getElementById('modalRemitenteInput');
+      if (remitenteGuardado && !remInput.value) {
+        remInput.value = remitenteGuardado;
+      }
+
+      const modal = document.getElementById('notifModal');
+      modal.classList.add('open');
+      setTimeout(() => {
+        if (!remInput.value) {
+          remInput.focus();
+        } else {
+          document.getElementById('modalDestinatarioInput').focus();
+        }
+      }, 60);
+    }
+
+    function cerrarModalNotificacion() {
+      document.getElementById('notifModal').classList.remove('open');
+    }
+
+    async function confirmarEnvioNotificacion() {
+      const remInput = document.getElementById('modalRemitenteInput');
+      const emailInput = document.getElementById('modalDestinatarioInput');
+      const remitente = (remInput.value || '').trim();
+      const correo = (emailInput.value || '').trim();
+
+      if (!remitente || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(remitente)) {
+        mostrarToast('Remitente inválido', 'Escribe el correo electrónico de quien envía la notificación.', true);
+        remInput.focus();
+        return;
+      }
+
+      if (!correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        mostrarToast('Destinatario inválido', 'Escribe un correo electrónico válido para el destinatario.', true);
+        emailInput.focus();
+        return;
+      }
+
+      localStorage.setItem('uv_remitente_correo', remitente);
+
+      const btn = document.getElementById('btnConfirmarEnvio');
+      const activos = obtenerDistritosActivos();
+      const radarBase64 = capturarImagenRadar();
+
+      const payload = {
+        remitente: remitente,
+        correo: correo,
+        distritos: activos,
+        radar_chart_base64: radarBase64
+      };
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Preparando gráficos...';
+
+      // Copiar imagen completa (barras + Radar) al portapapeles antes de abrir Gmail
+      let graficoCopiado = false;
+      try {
+        const pngBlob = await generarImagenReporteCompleto(activos, radarBase64, remitente, correo);
+        if (pngBlob && navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+          graficoCopiado = true;
+        }
+      } catch (clipErr) {
+        graficoCopiado = false;
+      }
+
+      try {
+        const res = await fetch('/enviar-notificacion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          mostrarToast(`⚠ ${data.estado || 'Aviso'}`, data.detalle, true);
+          return;
+        }
+
+        if (data.gmail_url) {
+          window.open(data.gmail_url, '_blank');
+        }
+
+        cerrarModalNotificacion();
+
+        if (data.gmail_url && graficoCopiado) {
+          mostrarToast(
+            '✓ Gráfico copiado · Pega con Ctrl + V en Gmail',
+            'En la pestaña de Gmail que se abrió, haz clic en el mensaje y presiona Ctrl + V para pegar las barras y el gráfico Radar.',
+            false
+          );
+        } else {
+          mostrarToast(`✓ ${data.estado || 'Enviado'}`, data.detalle, false);
+        }
+      } catch (err) {
+        cerrarModalNotificacion();
+        mostrarToast(
+          '⚠ Error de conexión',
+          'Asegúrate de tener app.py ejecutándose en http://127.0.0.1:5000.',
+          true
+        );
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send-fill"></i> Enviar notificación';
+      }
+    }
+
+    // ==========================================================================
+    // CONTADORES ANIMADOS AL CARGAR EL DASHBOARD
+    // ==========================================================================
+    function animarContadoresKPI() {
+      document.querySelectorAll('.counter').forEach(el => {
+        const target = parseFloat(el.dataset.target);
+        const decimals = parseInt(el.dataset.decimals || '2', 10);
+        const duration = 900;
+        const startTime = performance.now();
+
+        function step(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          const current = target * ease;
+          el.textContent = current.toFixed(decimals).replace('.', ',');
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+
+      setTimeout(() => {
+        document.querySelectorAll('.kpi-mini-fill').forEach(bar => {
+          bar.style.width = bar.dataset.width;
+        });
+      }, 100);
+    }
+
+    // ==========================================================================
+    // CAMBIO DE TEMA CLARO / OSCURO SOBRIO
+    // ==========================================================================
+    function alternarTema() {
+      document.body.classList.toggle('dark-theme');
+      const isDark = document.body.classList.contains('dark-theme');
+      document.getElementById('themeIcon').className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+      document.getElementById('themeText').textContent = isDark ? 'Modo Claro' : 'Modo Oscuro';
+      actualizarRadarDistritos(obtenerDistritosActivos());
+    }
+
+    // ==========================================================================
+    // TOOLTIP FLOTANTE
+    // ==========================================================================
+    const tooltipEl = document.getElementById('globalTooltip');
+
+    function mostrarTooltip(evt, htmlTexto) {
+      tooltipEl.innerHTML = htmlTexto;
+      tooltipEl.style.display = 'block';
+      moverTooltip(evt);
+    }
+
+    function moverTooltip(evt) {
+      const offset = 15;
+      let x = evt.clientX + offset;
+      let y = evt.clientY + offset;
+      const rect = tooltipEl.getBoundingClientRect();
+      if (x + rect.width > window.innerWidth - 12) x = evt.clientX - rect.width - offset;
+      if (y + rect.height > window.innerHeight - 12) y = evt.clientY - rect.height - offset;
+      tooltipEl.style.left = x + 'px';
+      tooltipEl.style.top = y + 'px';
+    }
+
+    function ocultarTooltip() {
+      tooltipEl.style.display = 'none';
+    }
+
+    // ==========================================================================
+    // BARRAS DINÁMICAS DE COBERTURA DEL DISTRITO EN EL ESCÁNER (12 DISTRITOS)
+    // ==========================================================================
+    function renderizarBarrasDistritoEscaner(d) {
+      const container = document.getElementById('indicatorIouContainer');
+      const tituloBox = document.getElementById('scannerDistTitle');
+      if (tituloBox) {
+        tituloBox.textContent = `Cobertura en ${d.nombre} (mIoU global: 0,6356)`;
+      }
+
+      const items = [
+        { nombre: "Vegetación", val: d.veg, ha: d.ha_veg, iouRef: "0,8192", color: "#2d6a4f" },
+        { nombre: "Superficie urb.", val: d.urb, ha: d.ha_urb, iouRef: "0,7402", color: "#b5483a" },
+        { nombre: "Vías", val: d.vias, ha: d.ha_vias, iouRef: "0,6032", color: "#5c677d" },
+        { nombre: "Suelo desc.", val: d.suelo, ha: d.ha_suelo, iouRef: "0,4232", color: "#c88a2b" }
+      ];
+
+      container.innerHTML = items.map(item => `
+        <div style="display: grid; grid-template-columns: 110px 1fr 54px; align-items: center; gap: 0.6rem;"
+             onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · ${item.nombre}</strong><br>${fmt(item.val)}% (${fmt(item.ha)} ha)<br>IoU validación modelo: ${item.iouRef}')"
+             onmouseleave="ocultarTooltip()">
+          <span style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary);">${item.nombre}</span>
+          <div style="height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden;">
+            <div style="height: 100%; width: ${item.val}%; background: ${item.color}; border-radius: 3px; transition: width 0.4s ease;"></div>
+          </div>
+          <span class="num" style="font-size: 0.78rem; font-weight: 700; text-align: right;">${fmt(item.val)}%</span>
+        </div>
+      `).join('');
+    }
+
+    // ==========================================================================
+    // GRÁFICO PRINCIPAL APILADO 100% CON ANIMACIÓN FLIP
+    // ==========================================================================
+    function construirFilasDistritosInicial() {
+      const container = document.getElementById('stackedRowsContainer');
+      const ordenados = [...DISTRITOS_DATA].sort((a, b) => b[indicadorOrdenGrafico] - a[indicadorOrdenGrafico]);
+      container.innerHTML = ordenados.map((d, idx) => crearHtmlFilaDistrito(d, idx + 1)).join('');
+    }
+
+    function crearHtmlFilaDistrito(d, rank) {
+      const valorActivo = fmt(d[indicadorOrdenGrafico], 2) + '%';
+      const idxSel = distritosSeleccionados.indexOf(d.id);
+      const isSelected = idxSel !== -1;
+      const dotColor = isSelected ? COLORES_SELECCION[idxSel].border : 'transparent';
+
+      return `
+        <div class="district-bar-row ${isSelected ? 'selected' : ''}"
+             data-id="${d.id}"
+             data-name="${d.nombre.toLowerCase()}"
+             onclick="seleccionarDistrito('${d.id}', event)">
+          <div class="rank-badge num" data-rank="${d.id}">${rank}</div>
+          <div class="district-label">
+            <span class="sel-dot" data-dot="${d.id}" style="background: ${dotColor}; display: ${isSelected && distritosSeleccionados.length > 1 ? 'inline-block' : 'none'};"></span>
+            <span>${d.nombre}</span>
+          </div>
+          <div class="stacked-track">
+            <div class="stack-seg seg-veg" style="width: ${d.veg}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Vegetación</strong><br>${fmt(d.veg)} % (${fmt(d.ha_veg)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+            <div class="stack-seg seg-vias" style="width: ${d.vias}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Vías</strong><br>${fmt(d.vias)} % (${fmt(d.ha_vias)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+            <div class="stack-seg seg-urb" style="width: ${d.urb}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Superficie urbanizada</strong><br>${fmt(d.urb)} % (${fmt(d.ha_urb)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+            <div class="stack-seg seg-suelo" style="width: ${d.suelo}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Suelo descubierto</strong><br>${fmt(d.suelo)} % (${fmt(d.ha_suelo)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+          </div>
+          <div class="district-metric-readout num" data-readout="${d.id}">${valorActivo}</div>
+        </div>
+      `;
+    }
+
+    function ordenarDistritosAnimado(indicador) {
+      indicadorOrdenGrafico = indicador;
+      document.querySelectorAll('.pill-tabs button[data-sort]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sort === indicador);
+      });
+
+      const container = document.getElementById('stackedRowsContainer');
+      const filas = Array.from(container.querySelectorAll('.district-bar-row'));
+
+      const posicionesAntes = new Map();
+      filas.forEach(el => posicionesAntes.set(el.dataset.id, el.getBoundingClientRect().top));
+
+      const ordenNuevo = [...DISTRITOS_DATA].sort((a, b) => b[indicador] - a[indicador]);
+
+      ordenNuevo.forEach((d, idx) => {
+        const filaEl = container.querySelector(`.district-bar-row[data-id="${d.id}"]`);
+        if (filaEl) {
+          const readout = filaEl.querySelector(`[data-readout="${d.id}"]`);
+          const rankEl = filaEl.querySelector(`[data-rank="${d.id}"]`);
+          if (readout) readout.textContent = fmt(d[indicador], 2) + '%';
+          if (rankEl) rankEl.textContent = idx + 1;
+          container.appendChild(filaEl);
+        }
+      });
+
+      filas.forEach(el => {
+        const topAntes = posicionesAntes.get(el.dataset.id);
+        const topDespues = el.getBoundingClientRect().top;
+        const deltaY = topAntes - topDespues;
+
+        if (Math.abs(deltaY) > 1) {
+          el.style.transition = 'none';
+          el.style.transform = `translateY(${deltaY}px)`;
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              el.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+              el.style.transform = 'translateY(0)';
+            });
+          });
+        }
+      });
+    }
+
+    // Buscador en vivo de distritos
+    function filtrarDistritoPorTexto(query) {
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('.district-bar-row').forEach(row => {
+        const match = row.dataset.name.includes(q);
+        row.style.opacity = match ? '1' : '0.2';
+      });
+      document.querySelectorAll('#districtTableBody tr').forEach(tr => {
+        const match = tr.dataset.name.includes(q);
+        tr.style.display = match ? '' : 'none';
+      });
+
+      if (q.length > 0) {
+        const coincidencia = DISTRITOS_DATA.find(d => d.nombre.toLowerCase().includes(q));
+        if (coincidencia) {
+          seleccionarDistrito(coincidencia.id, null);
+        }
+      }
+    }
+
+    // ==========================================================================
+    // SELECCIÓN ÚNICA O MÚLTIPLE CON CTRL+CLIC (HASTA 3 DISTRITOS)
+    // ==========================================================================
+    function limpiarSeleccionMultiple() {
+      if (distritosSeleccionados.length > 1) {
+        distritosSeleccionados = [distritosSeleccionados[0]];
+        actualizarVistaSeleccion();
+      }
+    }
+
+    function seleccionarDistrito(id, evt = null) {
+      const esCtrl = evt && (evt.ctrlKey || evt.metaKey);
+
+      if (!esCtrl) {
+        distritosSeleccionados = [id];
+      } else {
+        const idx = distritosSeleccionados.indexOf(id);
+        if (idx !== -1) {
+          if (distritosSeleccionados.length > 1) {
+            distritosSeleccionados.splice(idx, 1);
+          }
+        } else {
+          if (distritosSeleccionados.length >= 3) {
+            mostrarToast(
+              'Máximo 3 distritos',
+              'Ya tienes 3 distritos seleccionados. Haz Ctrl + clic sobre uno marcado para quitarlo o clic normal para reiniciar.',
+              true
+            );
+            return;
+          }
+          distritosSeleccionados.push(id);
+        }
+      }
+
+      actualizarVistaSeleccion();
+    }
+
+    function actualizarVistaSeleccion() {
+      const activos = obtenerDistritosActivos();
+      if (!activos.length) return;
+
+      const totalSel = activos.length;
+
+      const badgeTop = document.getElementById('badgeTopCount');
+      if (badgeTop) badgeTop.textContent = `(${totalSel})`;
+
+      const statusLabel = document.getElementById('selectionStatusLabel');
+      if (statusLabel) {
+        statusLabel.textContent = totalSel === 1
+          ? '1 distrito seleccionado'
+          : `${totalSel}/3 distritos seleccionados`;
+      }
+
+      const btnLimpiar = document.getElementById('btnLimpiarMulti');
+      if (btnLimpiar) {
+        btnLimpiar.style.display = totalSel > 1 ? 'inline-block' : 'none';
+      }
+
+      document.querySelectorAll('.district-bar-row').forEach(el => {
+        const rowId = el.dataset.id;
+        const idxSel = distritosSeleccionados.indexOf(rowId);
+        const isSel = idxSel !== -1;
+        el.classList.toggle('selected', isSel);
+        el.style.borderColor = isSel ? COLORES_SELECCION[idxSel].border : 'transparent';
+
+        const dot = el.querySelector(`[data-dot="${rowId}"]`);
+        if (dot) {
+          if (isSel && totalSel > 1) {
+            dot.style.display = 'inline-block';
+            dot.style.background = COLORES_SELECCION[idxSel].border;
+          } else {
+            dot.style.display = 'none';
+          }
+        }
+      });
+
+      document.querySelectorAll('#districtTableBody tr').forEach(tr => {
+        const isSel = distritosSeleccionados.includes(tr.dataset.rowId);
+        tr.classList.toggle('active-row', isSel);
+      });
+
+      const badgeInspector = document.getElementById('inspectorBadgeLabel');
+      const nameEl = document.getElementById('panelDistrictName');
+      const areaEl = document.getElementById('panelDistrictArea');
+      const cutsEl = document.getElementById('panelDistrictCuts');
+      const indicatorsContainer = document.getElementById('panelIndicatorsList');
+
+      if (totalSel === 1) {
+        const d = activos[0];
+        badgeInspector.textContent = 'Inspector de Distrito Activo';
+        nameEl.textContent = d.nombre;
+        areaEl.textContent = `${fmt(d.area)} ha`;
+        cutsEl.textContent = '20 recortes satelitales';
+
+        const gauges = [
+          { label: "Vegetación", pct: d.veg, ha: d.ha_veg, color: "#2d6a4f", icon: "bi-tree-fill" },
+          { label: "Vías", pct: d.vias, ha: d.ha_vias, color: "#5c677d", icon: "bi-signpost-split-fill" },
+          { label: "Urbanizada", pct: d.urb, ha: d.ha_urb, color: "#b5483a", icon: "bi-buildings-fill" },
+          { label: "Suelo desc.", pct: d.suelo, ha: d.ha_suelo, color: "#c88a2b", icon: "bi-layers-fill" }
+        ];
+
+        indicatorsContainer.innerHTML = gauges.map(g => `
+          <div class="gauge-box">
+            <div class="gauge-top">
+              <span><i class="bi ${g.icon} me-1" style="color: ${g.color};"></i>${g.label}</span>
+              <span class="gauge-ha num">${fmt(g.ha)} ha</span>
+            </div>
+            <div class="gauge-val num" style="color: ${g.color};">${fmt(g.pct)}%</div>
+            <div class="gauge-progress">
+              <div class="gauge-progress-bar" style="width: ${g.pct}%; background: ${g.color};"></div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        const sumaArea = activos.reduce((acc, item) => acc + item.area, 0);
+        badgeInspector.textContent = `Inspector Comparativo (${totalSel} Distritos Activos)`;
+        nameEl.innerHTML = activos.map((d, idx) =>
+          `<span style="color: ${COLORES_SELECCION[idx].border};">${d.nombre}</span>`
+        ).join(' · ');
+        areaEl.textContent = `${fmt(sumaArea)} ha`;
+        cutsEl.textContent = `${totalSel * 20} recortes satelitales`;
+
+        const categorias = [
+          { key: "veg", haKey: "ha_veg", label: "Vegetación", icon: "bi-tree-fill", baseColor: "#2d6a4f" },
+          { key: "vias", haKey: "ha_vias", label: "Vías", icon: "bi-signpost-split-fill", baseColor: "#5c677d" },
+          { key: "urb", haKey: "ha_urb", label: "Urbanizada", icon: "bi-buildings-fill", baseColor: "#b5483a" },
+          { key: "suelo", haKey: "ha_suelo", label: "Suelo desc.", icon: "bi-layers-fill", baseColor: "#c88a2b" }
+        ];
+
+        indicatorsContainer.innerHTML = categorias.map(cat => `
+          <div class="gauge-box" style="padding: 0.55rem 0.7rem;">
+            <div class="gauge-top" style="margin-bottom: 0.35rem;">
+              <span><i class="bi ${cat.icon}" style="color: ${cat.baseColor};"></i> ${cat.label}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.32rem;">
+              ${activos.map((d, idx) => {
+                const col = COLORES_SELECCION[idx].border;
+                return `
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem;">
+                      <span style="font-weight: 700; color: ${col};">● ${d.nombre}</span>
+                      <span class="num" style="font-weight: 700;">${fmt(d[cat.key])}% <span style="font-weight: 400; color: var(--text-muted);">(${fmt(d[cat.haKey])} ha)</span></span>
+                    </div>
+                    <div class="gauge-progress" style="margin-top: 2px; height: 3px;">
+                      <div class="gauge-progress-bar" style="width: ${d[cat.key]}%; background: ${col};"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      actualizarRadarDistritos(activos);
+
+      const ultimoDistrito = activos[activos.length - 1];
+      renderizarBarrasDistritoEscaner(ultimoDistrito);
+
+      const muestras = MUESTRAS_VERIFICACION.filter(m => m.distrito === ultimoDistrito.nombre);
+      const samplesContainer = document.getElementById('panelSamplesGrid');
+      const noticeEl = document.getElementById('sampleDistrictNotice');
+
+      if (muestras.length > 0) {
+        seleccionarMuestraVerificacion(muestras[0].id);
+        if (noticeEl) {
+          noticeEl.textContent = `Mostrando recorte satelital correspondiente a ${ultimoDistrito.nombre}.`;
+        }
+        samplesContainer.innerHTML = `
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${muestras.map(m => `
+              <button type="button" class="btn-action" style="flex: 1; justify-content: center;" onclick="cargarMuestraEnCortinilla('${m.id}')">
+                <i class="bi bi-eye"></i> Ver ${m.corto} en Escáner
+              </button>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        if (noticeEl) {
+          noticeEl.textContent = `${ultimoDistrito.nombre} no tiene recorte cargado en static/muestras/ (vista satelital de referencia).`;
+        }
+        samplesContainer.innerHTML = '';
+      }
+    }
+
+    function actualizarRadarDistritos(activos) {
+      const ctx = document.getElementById('districtRadarChart').getContext('2d');
+      const isDark = document.body.classList.contains('dark-theme');
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.1)';
+      const labelColor = isDark ? '#cbd5e1' : '#334155';
+
+      const avgLima = [10.77, 13.12, 67.87, 8.24];
+
+      const datasets = activos.map((d, idx) => {
+        const pal = COLORES_SELECCION[idx] || COLORES_SELECCION[0];
+        return {
+          label: d.nombre,
+          data: [d.veg, d.vias, d.urb, d.suelo],
+          backgroundColor: pal.bg,
+          borderColor: pal.border,
+          pointBackgroundColor: pal.border,
+          borderWidth: 2
+        };
+      });
+
+      datasets.push({
+        label: 'Promedio Lima',
+        data: avgLima,
+        backgroundColor: 'rgba(100, 116, 139, 0.08)',
+        borderColor: '#64748b',
+        pointBackgroundColor: '#64748b',
+        borderDash: [4, 4],
+        borderWidth: 1.5
+      });
+
+      const legendEl = document.getElementById('radarLegendInline');
+      if (legendEl) {
+        const itemsHtml = activos.map((d, idx) => {
+          const col = (COLORES_SELECCION[idx] || COLORES_SELECCION[0]).border;
+          return `<span style="color: ${col};">● ${d.nombre}</span>`;
+        });
+        itemsHtml.push(`<span style="color: #64748b;">● Promedio</span>`);
+        legendEl.innerHTML = itemsHtml.join(' &nbsp; ');
+      }
+
+      if (radarChartInstance) {
+        radarChartInstance.data.datasets = datasets;
+        radarChartInstance.options.scales.r.grid.color = gridColor;
+        radarChartInstance.options.scales.r.angleLines.color = gridColor;
+        radarChartInstance.options.scales.r.pointLabels.color = labelColor;
+        radarChartInstance.update();
+        return;
+      }
+
+      radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['% Vegetación', '% Vías', '% Urbanizada', '% Suelo desc.'],
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 250 },
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              suggestedMax: 85,
+              ticks: { display: false },
+              grid: { color: gridColor },
+              angleLines: { color: gridColor },
+              pointLabels: {
+                color: labelColor,
+                font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ==========================================================================
+    // TABLA INTERACTIVA
+    // ==========================================================================
+    function renderizarTablaDistritos() {
+      const tbody = document.getElementById('districtTableBody');
+      const { col, dir } = estadoOrdenTabla;
+
+      const copia = [...DISTRITOS_DATA].sort((a, b) => {
+        if (col === 'nombre') {
+          return dir === 'asc' ? a.nombre.localeCompare(b.nombre) : b.nombre.localeCompare(a.nombre);
+        }
+        return dir === 'asc' ? a[col] - b[col] : b[col] - a[col];
+      });
+
+      tbody.innerHTML = copia.map(d => `
+        <tr data-row-id="${d.id}" data-name="${d.nombre.toLowerCase()}" class="${distritosSeleccionados.includes(d.id) ? 'active-row' : ''}" onclick="seleccionarDistrito('${d.id}', event)" style="cursor: pointer;">
+          <td><strong>${d.nombre}</strong></td>
+          <td class="num">${fmt(d.area)}</td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.veg}%; background: rgba(45, 106, 79, 0.16);"></span>
+              <span class="cell-bar-val" style="color: #2d6a4f;">${fmt(d.veg)}%</span>
+            </div>
+          </td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.vias}%; background: rgba(92, 103, 125, 0.16);"></span>
+              <span class="cell-bar-val">${fmt(d.vias)}%</span>
+            </div>
+          </td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.urb}%; background: rgba(181, 72, 58, 0.16);"></span>
+              <span class="cell-bar-val" style="color: #b5483a;">${fmt(d.urb)}%</span>
+            </div>
+          </td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.suelo}%; background: rgba(200, 138, 43, 0.18);"></span>
+              <span class="cell-bar-val" style="color: #9c6819;">${fmt(d.suelo)}%</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function ordenarTabla(columna) {
+      if (estadoOrdenTabla.col === columna) {
+        estadoOrdenTabla.dir = estadoOrdenTabla.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        estadoOrdenTabla.col = columna;
+        estadoOrdenTabla.dir = columna === 'nombre' ? 'asc' : 'desc';
+      }
+      renderizarTablaDistritos();
+    }
+
+    // ==========================================================================
+    // CORTINILLA Y CHIPS DE LEYENDA OPENEARTHMAP
+    // ==========================================================================
+    function inicializarVerificacion() {
+      const selector = document.getElementById('sampleSelector');
+      selector.innerHTML = MUESTRAS_VERIFICACION.map((m, i) => `
+        <button type="button" class="${i === 0 ? 'active' : ''}" data-sample="${m.id}" onclick="seleccionarMuestraVerificacion('${m.id}')">
+          ${m.corto}
+        </button>
+      `).join('');
+
+      seleccionarMuestraVerificacion(MUESTRAS_VERIFICACION[0].id);
+
+      const legendGrid = document.getElementById('oemLegendGrid');
+      legendGrid.innerHTML = CLASES_OEM.map(c => `
+        <div class="oem-chip">
+          <span class="oem-swatch" style="background: ${c.hex};"></span>
+          <div>
+            <div style="font-weight: 700; font-size: 0.8rem;">${c.nombre}</div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary);">${c.indicador}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function seleccionarMuestraVerificacion(sampleId) {
+      const muestra = MUESTRAS_VERIFICACION.find(m => m.id === sampleId);
+      if (!muestra) return;
+
+      document.querySelectorAll('#sampleSelector button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sample === sampleId);
+      });
+
+      document.getElementById('curtainImgOrig').src = `${BASE_STATIC}muestras/${sampleId}_orig.jpg`;
+      document.getElementById('curtainImgOver').src = `${BASE_STATIC}muestras/${sampleId}_over.jpg`;
+      document.getElementById('curtainImgMask').src = `${BASE_STATIC}muestras/${sampleId}_mask.jpg`;
+      document.getElementById('sampleCaption').textContent = muestra.titulo;
+    }
+
+    function actualizarCortinilla(valor) {
+      const pct = Number(valor);
+      document.getElementById('curtainImgOver').style.clipPath = `inset(0 0 0 ${pct}%)`;
+      document.getElementById('curtainDivider').style.left = `${pct}%`;
+      document.getElementById('curtainHandle').style.left = `${pct}%`;
+    }
+
+    function cargarMuestraEnCortinilla(sampleId) {
+      seleccionarMuestraVerificacion(sampleId);
+      document.getElementById('panel-verificacion').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Descarga de CSV
+    function descargarCSV(nombreArchivo) {
+      let contenido = '';
+      if (nombreArchivo === 'tabla_porcentajes.csv') {
+        contenido = 'Distrito,Imágenes,Área analizada (ha),% Vegetación,% Vías,% Superficie urbanizada,% Suelo descubierto\n';
+        DISTRITOS_DATA.forEach(d => {
+          contenido += `${d.nombre},20,${d.area.toFixed(2)},${d.veg.toFixed(2)},${d.vias.toFixed(2)},${d.urb.toFixed(2)},${d.suelo.toFixed(2)}\n`;
+        });
+      } else {
+        contenido = 'Distrito,Imágenes,Píxeles totales,Píxeles clasificados,% Vegetación,ha Vegetación,% Vías,ha Vías,% Superficie urbanizada,ha Superficie urbanizada,% Suelo descubierto,ha Suelo descubierto,Área analizada (ha)\n';
+        DISTRITOS_DATA.forEach(d => {
+          contenido += `${d.nombre},20,${d.px_tot},${d.px_clas},${d.veg.toFixed(2)},${d.ha_veg.toFixed(2)},${d.vias.toFixed(2)},${d.ha_vias.toFixed(2)},${d.urb.toFixed(2)},${d.ha_urb.toFixed(2)},${d.suelo.toFixed(2)},${d.ha_suelo.toFixed(2)},${d.area.toFixed(2)}\n`;
+        });
+      }
+
+      const blob = new Blob(["\uFEFF" + contenido], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      animarContadoresKPI();
+      construirFilasDistritosInicial();
+      renderizarTablaDistritos();
+      inicializarVerificacion();
+      actualizarVistaSeleccion();
+    });
+  </script>
+</body>
+</html>
