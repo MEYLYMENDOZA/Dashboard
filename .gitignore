@@ -1,0 +1,14 @@
+# Ignorar carpetas pesadas o temporales locales
+resultados_FINAL_LIMA/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Ignorar los PNG crudos pesados de 9 MB (ya están recortados y optimizados en static/muestras/)
+static/verificacion_visual.png
+static/verificacion_visual_1.png
+static/verificacion_visual_2.png
+static/composicion_distritos.png
+static/vegetacion_distritos.png
+static/leyenda_clases.png

@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrbanVision Lima — Dashboard Interactivo de Cobertura Urbana</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       VARIABLES DE TEMA (DARK / LIGHT) Y COLORES VIBRANTES DE DASHBOARD
+       ========================================================================== */
+    :root {
+      --bg-main: #090d16;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.78);
+      --bg-card-hover: rgba(30, 41, 59, 0.88);
+      --bg-glass: rgba(15, 23, 42, 0.65);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(16, 185, 129, 0.35);
+
+      /* Paleta de indicadores con gradiente y versión viva */
+      --c-veg: #10b981;
+      --c-veg-dark: #059669;
+      --c-veg-glow: rgba(16, 185, 129, 0.25);
+
+      --c-vias: #64748b;
+      --c-vias-dark: #475569;
+      --c-vias-glow: rgba(100, 116, 139, 0.25);
+
+      --c-urb: #ef4444;
+      --c-urb-dark: #b91c1c;
+      --c-urb-glow: rgba(239, 68, 68, 0.25);
+
+      --c-suelo: #f59e0b;
+      --c-suelo-dark: #d97706;
+      --c-suelo-glow: rgba(245, 158, 11, 0.25);
+
+      --accent-cyan: #06b6d4;
+      --accent-indigo: #6366f1;
+      --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    body.light-theme {
+      --bg-main: #f1f5f9;
+      --bg-secondary: #e2e8f0;
+      --bg-card: rgba(255, 255, 255, 0.92);
+      --bg-card-hover: #ffffff;
+      --bg-glass: rgba(248, 250, 252, 0.85);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-color: rgba(15, 23, 42, 0.09);
+      --border-glow: rgba(16, 185, 129, 0.45);
+      --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      background-image:
+        radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.10) 0px, transparent 45%),
+        radial-gradient(at 90% 15%, rgba(99, 102, 241, 0.10) 0px, transparent 45%),
+        radial-gradient(at 50% 90%, rgba(239, 68, 68, 0.07) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      line-height: 1.45;
+      font-size: 14px;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ==========================================================================
+       ANIMACIONES DE ENTRADA Y PULSO
+       ========================================================================== */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+    }
+
+    @keyframes shimmerBar {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .anim-card {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .delay-1 { animation-delay: 0.06s; }
+    .delay-2 { animation-delay: 0.12s; }
+    .delay-3 { animation-delay: 0.18s; }
+    .delay-4 { animation-delay: 0.24s; }
+
+    /* ==========================================================================
+       BARRA SUPERIOR (TOPBAR) CON GLASSMORPHISM
+       ========================================================================== */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: var(--bg-glass);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      margin-right: 6px;
+      animation: pulseGlow 2s infinite;
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, var(--text-primary), #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    /* Buscador rápido en topbar */
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 11px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .search-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.45rem 0.8rem 0.45rem 2rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      width: 200px;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      width: 240px;
+    }
+
+    .btn-action {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      border-color: #10b981;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-action.primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: transparent;
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       LAYOUT GENERAL DEL DASHBOARD
+       ========================================================================== */
+    .dashboard-container {
+      max-width: 1580px;
+      margin: 0 auto;
+      padding: 1.4rem 1.75rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.35rem;
+    }
+
+    /* ==========================================================================
+       1. TARJETAS KPI ANIMADAS CON BARRA DE PROGRESO Y GLOW
+       ========================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.15rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.2rem 1.35rem;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--kpi-accent, #10b981);
+      box-shadow: 0 14px 32px -10px var(--kpi-glow, rgba(16, 185, 129, 0.3));
+    }
+
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--kpi-accent, #10b981);
+    }
+
+    .kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.6rem;
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .kpi-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      background: var(--kpi-glow, rgba(16, 185, 129, 0.15));
+      color: var(--kpi-accent, #10b981);
+    }
+
+    .kpi-value {
+      font-size: 2.05rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+
+    .kpi-footer {
+      margin-top: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    .kpi-mini-bar {
+      height: 4px;
+      width: 100%;
+      background: rgba(148, 163, 184, 0.15);
+      border-radius: 99px;
+      margin-top: 0.55rem;
+      overflow: hidden;
+    }
+
+    .kpi-mini-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--kpi-accent, #10b981);
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ==========================================================================
+       TARJETAS DE PANELES (DASH-CARD)
+       ========================================================================== */
+    .dash-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      transition: border-color 0.25s ease;
+    }
+
+    .dash-card:hover {
+      border-color: rgba(148, 163, 184, 0.22);
+    }
+
+    .card-header {
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .card-badge-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    .card-body {
+      padding: 1.35rem 1.4rem;
+    }
+
+    /* Botonera interactiva tipo píldora */
+    .pill-tabs {
+      display: inline-flex;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem;
+      border-radius: 10px;
+      gap: 0.25rem;
+    }
+
+    body.light-theme .pill-tabs {
+      background: #e2e8f0;
+    }
+
+    .pill-tabs button {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.38rem 0.85rem;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .pill-tabs button:hover {
+      color: var(--text-primary);
+    }
+
+    .pill-tabs button.active {
+      background: var(--active-bg, #10b981);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Filtros de leyenda interactivos */
+    .legend-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .legend-btn {
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+      padding: 0.3rem 0.7rem;
+      border-radius: 99px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .legend-btn:hover {
+      transform: scale(1.04);
+      border-color: var(--dot-color);
+    }
+
+    .legend-btn.dimmed {
+      opacity: 0.35;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px var(--dot-color);
+    }
+
+    /* ==========================================================================
+       2. PANEL CENTRAL: BARRAS APILADAS ANIMADAS + INSPECTOR CON RADAR / GAUGES
+       ========================================================================== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .stacked-rows-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .district-bar-row {
+      display: grid;
+      grid-template-columns: 30px 160px 1fr 78px;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.48rem 0.75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.light-theme .district-bar-row {
+      background: #f8fafc;
+    }
+
+    .district-bar-row:hover {
+      transform: translateX(6px);
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .district-bar-row.selected {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.16) 0%, rgba(99, 102, 241, 0.08) 100%);
+      border-color: #10b981;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+    }
+
+    .rank-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .district-bar-row.selected .rank-badge {
+      background: #10b981;
+      color: #ffffff;
+    }
+
+    .district-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .stacked-track {
+      height: 26px;
+      width: 100%;
+      display: flex;
+      overflow: hidden;
+      border-radius: 7px;
+      background: rgba(15, 23, 42, 0.5);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    body.light-theme .stacked-track {
+      background: #e2e8f0;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    .stack-seg {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease, transform 0.2s ease;
+      position: relative;
+    }
+
+    .stack-seg:hover {
+      filter: brightness(1.22);
+      transform: scaleY(1.08);
+      z-index: 2;
+    }
+
+    .seg-veg { background: linear-gradient(135deg, #34d399 0%, #059669 100%); }
+    .seg-vias { background: linear-gradient(135deg, #94a3b8 0%, #475569 100%); }
+    .seg-urb { background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%); }
+    .seg-suelo { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
+
+    .district-metric-readout {
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-align: right;
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       PANEL INSPECTOR DE DISTRITO (CON GRÁFICO RADAR + ANILLOS ANIMADOS)
+       ========================================================================== */
+    .inspector-card {
+      background: linear-gradient(160deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border: 1px solid var(--border-glow);
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    body.light-theme .inspector-card {
+      background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .inspector-gauges {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+
+    .gauge-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+
+    body.light-theme .gauge-box {
+      background: #ffffff;
+    }
+
+    .gauge-box:hover {
+      transform: translateY(-2px);
+    }
+
+    .gauge-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .gauge-val {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .gauge-ha {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .gauge-progress {
+      height: 5px;
+      width: 100%;
+      background: rgba(148, 163, 184, 0.15);
+      border-radius: 99px;
+      margin-top: 0.45rem;
+      overflow: hidden;
+    }
+
+    .gauge-progress-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .radar-box {
+      height: 210px;
+      position: relative;
+      margin: 0.5rem 0;
+    }
+
+    /* ==========================================================================
+       3. FILA DE 2 PANELES: TABLA INTERACTIVA + CORTINILLA SATELITAL
+       ========================================================================== */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 1.35rem;
+      align-items: stretch;
+    }
+
+    table.dash-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+
+    table.dash-table th,
+    table.dash-table td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    table.dash-table th {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      background: rgba(15, 23, 42, 0.35);
+      user-select: none;
+    }
+
+    body.light-theme table.dash-table th {
+      background: #f1f5f9;
+    }
+
+    table.dash-table th.num,
+    table.dash-table td.num {
+      text-align: right;
+    }
+
+    table.dash-table tbody tr {
+      transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    table.dash-table tbody tr:hover {
+      background-color: rgba(16, 185, 129, 0.08);
+    }
+
+    table.dash-table tbody tr.active-row {
+      background-color: rgba(16, 185, 129, 0.16);
+      border-left: 3px solid #10b981;
+    }
+
+    th.sortable {
+      cursor: pointer;
+    }
+
+    th.sortable:hover {
+      color: #10b981;
+    }
+
+    .cell-bar-wrap {
+      position: relative;
+      padding: 0.22rem 0.5rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-width: 82px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .cell-bar-bg {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      right: 0;
+      border-radius: 4px;
+      z-index: 0;
+      transition: width 0.5s ease;
+    }
+
+    .cell-bar-val {
+      position: relative;
+      z-index: 1;
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       VISOR DE CORTINILLA SATELITAL INTERACTIVA
+       ========================================================================== */
+    .sample-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .sample-pills button {
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      padding: 0.3rem 0.65rem;
+      border-radius: 7px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sample-pills button:hover {
+      color: var(--text-primary);
+      border-color: #10b981;
+    }
+
+    .sample-pills button.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+    }
+
+    .trio-viewer {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1.15rem;
+      align-items: start;
+    }
+
+    .curtain-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 2px solid rgba(16, 185, 129, 0.45);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+      user-select: none;
+    }
+
+    .curtain-container img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .curtain-overlay-img {
+      clip-path: inset(0 0 0 50%);
+    }
+
+    .curtain-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      background: #10b981;
+      box-shadow: 0 0 12px #10b981;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .curtain-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      pointer-events: none;
+      z-index: 4;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+    }
+
+    .curtain-range {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      z-index: 5;
+    }
+
+    .mask-reference-box img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      display: block;
+    }
+
+    /* Chips de las 9 clases OpenEarthMap */
+    .oem-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .oem-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    body.light-theme .oem-chip {
+      background: #f8fafc;
+    }
+
+    .oem-chip:hover {
+      transform: translateY(-3px);
+      border-color: #10b981;
+    }
+
+    .oem-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    /* Tooltip flotante */
+    .tooltip-box {
+      position: fixed;
+      pointer-events: none;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #ffffff;
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      z-index: 1000;
+      display: none;
+      white-space: nowrap;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    @media (max-width: 1200px) {
+      .main-grid,
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .district-bar-row {
+        grid-template-columns: 26px 120px 1fr 62px;
+      }
+      .trio-viewer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tooltip interactivo -->
+  <div id="globalTooltip" class="tooltip-box" role="status" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       BARRA SUPERIOR DE DASHBOARD INTERACTIVO
+       ======================================================================== -->
+  <nav class="topbar">
+    <div class="brand-area">
+      <div class="brand-logo">
+        <i class="bi bi-layers-half"></i>
+      </div>
+      <div>
+        <div class="brand-title">UrbanVision Lima</div>
+        <div class="brand-subtitle">
+          <span class="live-dot"></span>
+          Segmentación Semántica Satelital · 12 Distritos · 240 Imágenes
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-controls">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" id="districtSearchInput" class="search-input" placeholder="Buscar distrito..." oninput="filtrarDistritoPorTexto(this.value)">
+      </div>
+
+      <button type="button" class="btn-action" onclick="alternarTema()" id="btnThemeToggle" title="Cambiar modo oscuro / claro">
+        <i class="bi bi-sun-fill" id="themeIcon"></i>
+        <span id="themeText">Modo Claro</span>
+      </button>
+
+      <button type="button" class="btn-action" onclick="descargarCSV('tabla_porcentajes.csv')">
+        <i class="bi bi-download"></i> CSV %
+      </button>
+
+      <button type="button" class="btn-action primary" onclick="descargarCSV('indicadores_por_distrito.csv')">
+        <i class="bi bi-file-earmark-spreadsheet"></i> CSV Completo (ha)
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================================================
+       CONTENIDO PRINCIPAL DEL DASHBOARD
+       ======================================================================== -->
+  <main class="dashboard-container">
+
+    <!-- 1. TARJETAS KPI CON CONTADORES ANIMADOS Y GLOW -->
+    <div class="kpi-grid">
+      <div class="kpi-card anim-card delay-1" style="--kpi-accent: #06b6d4; --kpi-glow: rgba(6, 182, 212, 0.2);">
+        <div class="kpi-top">
+          <span class="kpi-label">Superficie Clasificada</span>
+          <div class="kpi-icon"><i class="bi bi-bounding-box-circles"></i></div>
+        </div>
+        <div class="kpi-value num"><span class="counter" data-target="2115.19" data-decimals="2">0</span> <span style="font-size: 1rem; font-weight: 600; color: var(--text-secondary);">ha</span></div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="96%"></div></div>
+        <div class="kpi-footer">
+          <span><i class="bi bi-grid-3x3-gap-fill me-1"></i>240 recortes GeoTIFF</span>
+          <strong>0,292 m/px</strong>
+        </div>
+      </div>
+
+      <div class="kpi-card anim-card delay-2" style="--kpi-accent: #10b981; --kpi-glow: rgba(16, 185, 129, 0.22);">
+        <div class="kpi-top">
+          <span class="kpi-label">Líder Cobertura Vegetal</span>
+          <div class="kpi-icon"><i class="bi bi-tree-fill"></i></div>
+        </div>
+        <div class="kpi-value num" style="color: #10b981;"><span class="counter" data-target="27.02" data-decimals="2">0</span>%</div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="82%"></div></div>
+        <div class="kpi-footer">
+          <span>Máx: <strong>San Isidro</strong> (47,19 ha)</span>
+          <span>Prom: <strong>10,77%</strong></span>
+        </div>
+      </div>
+
+      <div class="kpi-card anim-card delay-3" style="--kpi-accent: #ef4444; --kpi-glow: rgba(239, 68, 68, 0.22);">
+        <div class="kpi-top">
+          <span class="kpi-label">Superficie Urbanizada</span>
+          <div class="kpi-icon"><i class="bi bi-buildings-fill"></i></div>
+        </div>
+        <div class="kpi-value num" style="color: #f87171;"><span class="counter" data-target="67.87" data-decimals="2">0</span>%</div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="68%"></div></div>
+        <div class="kpi-footer">
+          <span>Total: <strong>1 437,43 ha</strong></span>
+          <span>Máx: <strong>Cercado (81,89%)</strong></span>
+        </div>
+      </div>
+
+      <div class="kpi-card anim-card delay-4" style="--kpi-accent: #6366f1; --kpi-glow: rgba(99, 102, 241, 0.22);">
+        <div class="kpi-top">
+          <span class="kpi-label">Precisión del Modelo (mIoU)</span>
+          <div class="kpi-icon"><i class="bi bi-cpu-fill"></i></div>
+        </div>
+        <div class="kpi-value num" style="color: #818cf8;"><span class="counter" data-target="0.6356" data-decimals="4">0</span></div>
+        <div class="kpi-mini-bar"><div class="kpi-mini-fill" data-width="78%"></div></div>
+        <div class="kpi-footer">
+          <span>U-Net + EfficientNet-B4</span>
+          <strong>IoU Veg: 0,8192</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. PANEL CENTRAL: RANKING INTERACTIVO APILADO + INSPECTOR DINÁMICO CON RADAR -->
+    <div class="dash-card anim-card delay-2">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-badge-icon"><i class="bi bi-bar-chart-steps"></i></div>
+          <div>
+            <h2 class="card-title">Distribución Interactiva de Cobertura por Distrito</h2>
+            <div class="card-subtitle">Cambia el criterio para reordenar con animación en vivo o haz clic en un distrito para analizar su perfil</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap;">
+          <!-- Leyenda interactiva con filtro -->
+          <div class="legend-pills">
+            <button type="button" class="legend-btn" style="--dot-color: #10b981;" onclick="ordenarDistritosAnimado('veg')">
+              <span class="legend-dot" style="background: #10b981;"></span>Vegetación
+            </button>
+            <button type="button" class="legend-btn" style="--dot-color: #94a3b8;" onclick="ordenarDistritosAnimado('vias')">
+              <span class="legend-dot" style="background: #94a3b8;"></span>Vías
+            </button>
+            <button type="button" class="legend-btn" style="--dot-color: #ef4444;" onclick="ordenarDistritosAnimado('urb')">
+              <span class="legend-dot" style="background: #ef4444;"></span>Urbanizada
+            </button>
+            <button type="button" class="legend-btn" style="--dot-color: #f59e0b;" onclick="ordenarDistritosAnimado('suelo')">
+              <span class="legend-dot" style="background: #f59e0b;"></span>Suelo desc.
+            </button>
+          </div>
+
+          <!-- Selector de ordenamiento animado -->
+          <div class="pill-tabs" role="group" aria-label="Ordenar distritos">
+            <button type="button" class="active" data-sort="veg" style="--active-bg: #10b981;" onclick="ordenarDistritosAnimado('veg')">
+              <i class="bi bi-tree"></i> % Veg.
+            </button>
+            <button type="button" data-sort="vias" style="--active-bg: #64748b;" onclick="ordenarDistritosAnimado('vias')">
+              <i class="bi bi-signpost-2"></i> % Vías
+            </button>
+            <button type="button" data-sort="urb" style="--active-bg: #ef4444;" onclick="ordenarDistritosAnimado('urb')">
+              <i class="bi bi-buildings"></i> % Urb.
+            </button>
+            <button type="button" data-sort="suelo" style="--active-bg: #f59e0b;" onclick="ordenarDistritosAnimado('suelo')">
+              <i class="bi bi-layers"></i> % Suelo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="main-grid">
+          <!-- Columna izquierda: Barras apiladas con animación FLIP -->
+          <div id="stackedRowsContainer" class="stacked-rows-container"></div>
+
+          <!-- Columna derecha: Inspector interactivo del distrito seleccionado con Radar Chart.js -->
+          <aside class="inspector-card" aria-live="polite">
+            <div class="inspector-header">
+              <div>
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #10b981; font-weight: 800;">
+                  <i class="bi bi-broadcast me-1"></i>Inspector de Distrito Activo
+                </div>
+                <h3 id="panelDistrictName" style="font-size: 1.35rem; font-weight: 800; margin-top: 0.1rem;">San Isidro</h3>
+              </div>
+              <div style="text-align: right;">
+                <span id="panelDistrictArea" class="num" style="font-size: 0.95rem; font-weight: 800; color: #06b6d4;">174,65 ha</span>
+                <div style="font-size: 0.72rem; color: var(--text-secondary);">20 recortes satelitales</div>
+              </div>
+            </div>
+
+            <!-- 4 Tarjetas Gauge del distrito -->
+            <div id="panelIndicatorsList" class="inspector-gauges"></div>
+
+            <!-- Gráfico Radar Comparativo: Distrito vs Promedio Lima -->
+            <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">Perfil del Distrito vs. Promedio Lima</span>
+                <span style="font-size: 0.72rem; color: #10b981;">● Distrito &nbsp; <span style="color: #94a3b8;">● Promedio</span></span>
+              </div>
+              <div class="radar-box">
+                <canvas id="districtRadarChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Miniaturas rápidas del distrito -->
+            <div id="panelSamplesGrid" style="margin-top: 0.85rem;"></div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. FILA INFERIOR: TABLA INTERACTIVA CON BARRAS DE COLOR + CORTINILLA SATELITAL -->
+    <div class="bottom-grid">
+
+      <!-- Tabla de Métricas por Distrito -->
+      <div class="dash-card anim-card delay-3">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-badge-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+              <i class="bi bi-table"></i>
+            </div>
+            <div>
+              <h2 class="card-title">Tabla Comparativa Interactiva</h2>
+              <div class="card-subtitle">Haz clic en cualquier encabezado para ordenar o en una fila para cargar el distrito en el inspector</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div style="overflow-x: auto;">
+            <table class="dash-table" id="districtTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-col="nombre" onclick="ordenarTabla('nombre')">Distrito</th>
+                  <th class="num sortable" data-col="area" onclick="ordenarTabla('area')">Área (ha)</th>
+                  <th class="num sortable desc" data-col="veg" onclick="ordenarTabla('veg')">% Vegetación</th>
+                  <th class="num sortable" data-col="vias" onclick="ordenarTabla('vias')">% Vías</th>
+                  <th class="num sortable" data-col="urb" onclick="ordenarTabla('urb')">% Urbanizada</th>
+                  <th class="num sortable" data-col="suelo" onclick="ordenarTabla('suelo')">% Suelo</th>
+                </tr>
+              </thead>
+              <tbody id="districtTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visor Satelital de Cortinilla Píxel a Píxel -->
+      <div class="dash-card anim-card delay-4" id="panel-verificacion">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-badge-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+              <i class="bi bi-sliders"></i>
+            </div>
+            <div>
+              <h2 class="card-title">Escáner Satelital Píxel a Píxel (Cortinilla)</h2>
+              <div class="card-subtitle">Arrastra el divisor central para contrastar imagen satelital y máscara</div>
+            </div>
+          </div>
+          <div id="sampleSelector" class="sample-pills"></div>
+        </div>
+
+        <div class="card-body">
+          <div class="trio-viewer">
+            <!-- Cortinilla deslizante -->
+            <div>
+              <div class="curtain-container" id="curtainBox">
+                <img id="curtainImgOrig" src="" alt="Imagen satelital original">
+                <img id="curtainImgOver" class="curtain-overlay-img" src="" alt="Superposición predicha">
+                <div id="curtainDivider" class="curtain-divider"></div>
+                <div id="curtainHandle" class="curtain-handle"><i class="bi bi-arrows-expand" style="transform: rotate(90deg);"></i></div>
+                <input type="range" min="0" max="100" value="50" class="curtain-range" id="curtainSlider" aria-label="Deslizar cortinilla" oninput="actualizarCortinilla(this.value)">
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.45rem; font-weight: 600;">
+                <span><i class="bi bi-globe-americas me-1"></i>Captura Satelital</span>
+                <span style="color: #10b981;">Predicción Superpuesta<i class="bi bi-layers-fill ms-1"></i></span>
+              </div>
+            </div>
+
+            <!-- Máscara de clasificación pura + IoU por clase -->
+            <div class="mask-reference-box">
+              <img id="curtainImgMask" src="" alt="Máscara de segmentación">
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 0.45rem 0 0.75rem;" id="sampleCaption">
+                Máscara de 9 clases
+              </div>
+
+              <!-- Barras de IoU por indicador con brillo -->
+              <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem;">
+                <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.55rem;">
+                  Precisión IoU por Clase
+                </div>
+                <div id="indicatorIouContainer" style="display: flex; flex-direction: column; gap: 0.55rem;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 4. PALETA INTERACTIVA DE LAS 9 CLASES OPENEARTHMAP -->
+    <div class="dash-card anim-card delay-4">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-badge-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+            <i class="bi bi-palette-fill"></i>
+          </div>
+          <div>
+            <h2 class="card-title">Paleta Oficial de Clases de Segmentación (OpenEarthMap)</h2>
+            <div class="card-subtitle">Codificación RGB de las 9 clases detectadas por la red neuronal</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="oemLegendGrid" class="oem-chips-grid"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==========================================================================
+       LÓGICA INTERACTIVA, CONTADORES ANIMADOS, GRÁFICO RADAR Y FLIP ANIMATION
+       ========================================================================== -->
+  <script>
+    const BASE_STATIC = (window.location.protocol === 'file:' && window.location.pathname.includes('/templates/'))
+      ? '../static/'
+      : 'static/';
+
+    const INDICADORES_IOU = [
+      { nombre: "Vegetación", iou: 0.8192, color: "#10b981" },
+      { nombre: "Superficie urb.", iou: 0.7402, color: "#ef4444" },
+      { nombre: "Vías", iou: 0.6032, color: "#94a3b8" },
+      { nombre: "Suelo desc.", iou: 0.4232, color: "#f59e0b" }
+    ];
+
+    const DISTRITOS_DATA = [
+      { id: "san_isidro", nombre: "San Isidro", area: 174.65, veg: 27.02, vias: 12.43, urb: 60.11, suelo: 0.44, ha_veg: 47.19, ha_vias: 21.70, ha_urb: 104.99, ha_suelo: 0.76, px_tot: 20971520, px_clas: 20483415 },
+      { id: "san_borja", nombre: "San Borja", area: 175.71, veg: 22.22, vias: 15.91, urb: 61.73, suelo: 0.15, ha_veg: 39.04, ha_vias: 27.95, ha_urb: 108.46, ha_suelo: 0.26, px_tot: 20971520, px_clas: 20607695 },
+      { id: "chaclacayo", nombre: "Chaclacayo", area: 176.91, veg: 18.24, vias: 3.85, urb: 22.92, suelo: 54.99, ha_veg: 32.27, ha_vias: 6.81, ha_urb: 40.55, ha_suelo: 97.27, px_tot: 20971520, px_clas: 20748236 },
+      { id: "miraflores", nombre: "Miraflores", area: 178.58, veg: 11.15, vias: 13.98, urb: 74.87, suelo: 0.01, ha_veg: 19.91, ha_vias: 24.96, ha_urb: 133.70, ha_suelo: 0.01, px_tot: 20971520, px_clas: 20944925 },
+      { id: "comas", nombre: "Comas", area: 178.64, veg: 10.33, vias: 17.48, urb: 71.29, suelo: 0.91, ha_veg: 18.45, ha_vias: 31.22, ha_urb: 127.35, ha_suelo: 1.62, px_tot: 20971520, px_clas: 20951416 },
+      { id: "los_olivos", nombre: "Los Olivos", area: 178.75, veg: 9.63, vias: 17.87, urb: 72.41, suelo: 0.10, ha_veg: 17.21, ha_vias: 31.93, ha_urb: 129.43, ha_suelo: 0.18, px_tot: 20971520, px_clas: 20964876 },
+      { id: "surco", nombre: "Santiago de Surco", area: 176.21, veg: 7.16, vias: 13.51, urb: 76.08, suelo: 3.25, ha_veg: 12.62, ha_vias: 23.81, ha_urb: 134.05, ha_suelo: 5.72, px_tot: 20971520, px_clas: 20665986 },
+      { id: "ves", nombre: "Villa El Salvador", area: 178.60, veg: 6.00, vias: 14.34, urb: 78.03, suelo: 1.63, ha_veg: 10.72, ha_vias: 25.62, ha_urb: 139.36, ha_suelo: 2.91, px_tot: 20971520, px_clas: 20947092 },
+      { id: "sjl", nombre: "San Juan de Lurigancho", area: 178.02, veg: 4.83, vias: 13.34, urb: 79.71, suelo: 2.12, ha_veg: 8.60, ha_vias: 23.75, ha_urb: 141.90, ha_suelo: 3.77, px_tot: 20971520, px_clas: 20878755 },
+      { id: "ate", nombre: "Ate", area: 177.20, veg: 4.80, vias: 10.70, urb: 74.11, suelo: 10.39, ha_veg: 8.50, ha_vias: 18.96, ha_urb: 131.33, ha_suelo: 18.41, px_tot: 20971520, px_clas: 20782906 },
+      { id: "ancon", nombre: "Ancón", area: 163.24, veg: 4.39, vias: 9.57, urb: 61.28, suelo: 24.76, ha_veg: 7.16, ha_vias: 15.62, ha_urb: 100.04, ha_suelo: 40.42, px_tot: 20971520, px_clas: 19145391 },
+      { id: "cercado", nombre: "Cercado de Lima", area: 178.67, veg: 3.52, vias: 14.50, urb: 81.89, suelo: 0.08, ha_veg: 6.30, ha_vias: 25.91, ha_urb: 146.32, ha_suelo: 0.15, px_tot: 20971520, px_clas: 20954883 }
+    ];
+
+    const CLASES_OEM = [
+      { nombre: "Tree", rgb: "34, 97, 38", hex: "rgb(34, 97, 38)", indicador: "Vegetación" },
+      { nombre: "Rangeland", rgb: "0, 255, 36", hex: "rgb(0, 255, 36)", indicador: "Vegetación" },
+      { nombre: "Road", rgb: "255, 255, 255", hex: "rgb(255, 255, 255)", indicador: "Vías" },
+      { nombre: "Building", rgb: "222, 31, 7", hex: "rgb(222, 31, 7)", indicador: "Superficie urbanizada" },
+      { nombre: "Developed space", rgb: "148, 148, 148", hex: "rgb(148, 148, 148)", indicador: "Superficie urbanizada" },
+      { nombre: "Bareland", rgb: "128, 0, 0", hex: "rgb(128, 0, 0)", indicador: "Suelo descubierto" },
+      { nombre: "Water", rgb: "0, 69, 255", hex: "rgb(0, 69, 255)", indicador: "Agua / Litoral" },
+      { nombre: "Agriculture land", rgb: "75, 181, 73", hex: "rgb(75, 181, 73)", indicador: "Agrícola" },
+      { nombre: "Background", rgb: "0, 0, 0", hex: "rgb(0, 0, 0)", indicador: "Fondo" }
+    ];
+
+    const MUESTRAS_VERIFICACION = [
+      { id: "san_borja_003", distrito: "San Borja", corto: "San Borja 003", titulo: "San Borja — San Borja_003.tif" },
+      { id: "san_borja_006", distrito: "San Borja", corto: "San Borja 006", titulo: "San Borja — San Borja_006.tif" },
+      { id: "ves_005", distrito: "Villa El Salvador", corto: "VES 005", titulo: "Villa El Salvador — VES_005.tif" },
+      { id: "ves_004", distrito: "Villa El Salvador", corto: "VES 004", titulo: "Villa El Salvador — VES_004.tif" },
+      { id: "ancon_015", distrito: "Ancón", corto: "Ancón 015", titulo: "Ancón — Ancon_015.tif" },
+      { id: "ancon_009", distrito: "Ancón", corto: "Ancón 009", titulo: "Ancón — Ancon_009.tif" }
+    ];
+
+    let indicadorOrdenGrafico = 'veg';
+    let distritoSeleccionadoId = 'san_isidro';
+    let estadoOrdenTabla = { col: 'veg', dir: 'desc' };
+    let radarChartInstance = null;
+
+    function fmt(num, decimales = 2) {
+      return Number(num).toFixed(decimales).replace('.', ',');
+    }
+
+    // ==========================================================================
+    // CONTADORES ANIMADOS AL CARGAR EL DASHBOARD
+    // ==========================================================================
+    function animarContadoresKPI() {
+      document.querySelectorAll('.counter').forEach(el => {
+        const target = parseFloat(el.dataset.target);
+        const decimals = parseInt(el.dataset.decimals || '2', 10);
+        const duration = 1100;
+        const startTime = performance.now();
+
+        function step(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          const current = target * ease;
+          el.textContent = current.toFixed(decimals).replace('.', ',');
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+
+      setTimeout(() => {
+        document.querySelectorAll('.kpi-mini-fill').forEach(bar => {
+          bar.style.width = bar.dataset.width;
+        });
+      }, 120);
+    }
+
+    // ==========================================================================
+    // CAMBIO DE TEMA OSCURO / CLARO
+    // ==========================================================================
+    function alternarTema() {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      document.getElementById('themeIcon').className = isLight ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+      document.getElementById('themeText').textContent = isLight ? 'Modo Oscuro' : 'Modo Claro';
+      if (radarChartInstance) {
+        actualizarRadarDistrito(DISTRITOS_DATA.find(d => d.id === distritoSeleccionadoId));
+      }
+    }
+
+    // ==========================================================================
+    // TOOLTIP FLOTANTE
+    // ==========================================================================
+    const tooltipEl = document.getElementById('globalTooltip');
+
+    function mostrarTooltip(evt, htmlTexto) {
+      tooltipEl.innerHTML = htmlTexto;
+      tooltipEl.style.display = 'block';
+      moverTooltip(evt);
+    }
+
+    function moverTooltip(evt) {
+      const offset = 15;
+      let x = evt.clientX + offset;
+      let y = evt.clientY + offset;
+      const rect = tooltipEl.getBoundingClientRect();
+      if (x + rect.width > window.innerWidth - 12) x = evt.clientX - rect.width - offset;
+      if (y + rect.height > window.innerHeight - 12) y = evt.clientY - rect.height - offset;
+      tooltipEl.style.left = x + 'px';
+      tooltipEl.style.top = y + 'px';
+    }
+
+    function ocultarTooltip() {
+      tooltipEl.style.display = 'none';
+    }
+
+    // ==========================================================================
+    // BARRAS DE PRECISIÓN IoU POR INDICADOR
+    // ==========================================================================
+    function renderizarIouIndicadores() {
+      const container = document.getElementById('indicatorIouContainer');
+      container.innerHTML = INDICADORES_IOU.map(item => `
+        <div style="display: grid; grid-template-columns: 110px 1fr 48px; align-items: center; gap: 0.6rem;"
+             onmousemove="mostrarTooltip(event, '<strong>${item.nombre}</strong><br>IoU del modelo: ${fmt(item.iou, 4)}')"
+             onmouseleave="ocultarTooltip()">
+          <span style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary);">${item.nombre}</span>
+          <div style="height: 8px; background: rgba(148,163,184,0.15); border-radius: 99px; overflow: hidden;">
+            <div style="height: 100%; width: ${(item.iou * 100).toFixed(1)}%; background: ${item.color}; border-radius: 99px; box-shadow: 0 0 10px ${item.color};"></div>
+          </div>
+          <span class="num" style="font-size: 0.78rem; font-weight: 800; text-align: right;">${fmt(item.iou, 4)}</span>
+        </div>
+      `).join('');
+    }
+
+    // ==========================================================================
+    // GRÁFICO PRINCIPAL APILADO 100% CON ANIMACIÓN FLIP
+    // ==========================================================================
+    function construirFilasDistritosInicial() {
+      const container = document.getElementById('stackedRowsContainer');
+      const ordenados = [...DISTRITOS_DATA].sort((a, b) => b[indicadorOrdenGrafico] - a[indicadorOrdenGrafico]);
+      container.innerHTML = ordenados.map((d, idx) => crearHtmlFilaDistrito(d, idx + 1)).join('');
+    }
+
+    function crearHtmlFilaDistrito(d, rank) {
+      const valorActivo = fmt(d[indicadorOrdenGrafico], 2) + '%';
+      return `
+        <div class="district-bar-row ${distritoSeleccionadoId === d.id ? 'selected' : ''}"
+             data-id="${d.id}"
+             data-name="${d.nombre.toLowerCase()}"
+             onclick="seleccionarDistrito('${d.id}')">
+          <div class="rank-badge num" data-rank="${d.id}">${rank}</div>
+          <div class="district-label">${d.nombre}</div>
+          <div class="stacked-track">
+            <div class="stack-seg seg-veg" style="width: ${d.veg}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Vegetación</strong><br>${fmt(d.veg)} % (${fmt(d.ha_veg)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+            <div class="stack-seg seg-vias" style="width: ${d.vias}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Vías</strong><br>${fmt(d.vias)} % (${fmt(d.ha_vias)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+            <div class="stack-seg seg-urb" style="width: ${d.urb}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Superficie urbanizada</strong><br>${fmt(d.urb)} % (${fmt(d.ha_urb)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+            <div class="stack-seg seg-suelo" style="width: ${d.suelo}%;"
+                 onmousemove="mostrarTooltip(event, '<strong>${d.nombre} · Suelo descubierto</strong><br>${fmt(d.suelo)} % (${fmt(d.ha_suelo)} ha)')"
+                 onmouseleave="ocultarTooltip()"></div>
+          </div>
+          <div class="district-metric-readout num" data-readout="${d.id}">${valorActivo}</div>
+        </div>
+      `;
+    }
+
+    function ordenarDistritosAnimado(indicador) {
+      indicadorOrdenGrafico = indicador;
+      document.querySelectorAll('.pill-tabs button[data-sort]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sort === indicador);
+      });
+
+      const container = document.getElementById('stackedRowsContainer');
+      const filas = Array.from(container.querySelectorAll('.district-bar-row'));
+
+      const posicionesAntes = new Map();
+      filas.forEach(el => posicionesAntes.set(el.dataset.id, el.getBoundingClientRect().top));
+
+      const ordenNuevo = [...DISTRITOS_DATA].sort((a, b) => b[indicador] - a[indicador]);
+
+      ordenNuevo.forEach((d, idx) => {
+        const filaEl = container.querySelector(`.district-bar-row[data-id="${d.id}"]`);
+        if (filaEl) {
+          const readout = filaEl.querySelector(`[data-readout="${d.id}"]`);
+          const rankEl = filaEl.querySelector(`[data-rank="${d.id}"]`);
+          if (readout) readout.textContent = fmt(d[indicador], 2) + '%';
+          if (rankEl) rankEl.textContent = idx + 1;
+          container.appendChild(filaEl);
+        }
+      });
+
+      filas.forEach(el => {
+        const topAntes = posicionesAntes.get(el.dataset.id);
+        const topDespues = el.getBoundingClientRect().top;
+        const deltaY = topAntes - topDespues;
+
+        if (Math.abs(deltaY) > 1) {
+          el.style.transition = 'none';
+          el.style.transform = `translateY(${deltaY}px)`;
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              el.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+              el.style.transform = 'translateY(0)';
+            });
+          });
+        }
+      });
+    }
+
+    // Buscador en vivo de distritos
+    function filtrarDistritoPorTexto(query) {
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('.district-bar-row').forEach(row => {
+        const match = row.dataset.name.includes(q);
+        row.style.opacity = match ? '1' : '0.2';
+      });
+      document.querySelectorAll('#districtTableBody tr').forEach(tr => {
+        const match = tr.dataset.name.includes(q);
+        tr.style.display = match ? '' : 'none';
+      });
+    }
+
+    // ==========================================================================
+    // INSPECTOR DE DISTRITO + GRÁFICO RADAR INTERACTIVO
+    // ==========================================================================
+    function seleccionarDistrito(id) {
+      distritoSeleccionadoId = id;
+      const d = DISTRITOS_DATA.find(item => item.id === id);
+      if (!d) return;
+
+      document.querySelectorAll('.district-bar-row').forEach(el => {
+        el.classList.toggle('selected', el.dataset.id === id);
+      });
+
+      document.querySelectorAll('#districtTableBody tr').forEach(tr => {
+        tr.classList.toggle('active-row', tr.dataset.rowId === id);
+      });
+
+      document.getElementById('panelDistrictName').textContent = d.nombre;
+      document.getElementById('panelDistrictArea').textContent = `${fmt(d.area)} ha`;
+
+      const gauges = [
+        { label: "Vegetación", pct: d.veg, ha: d.ha_veg, color: "#10b981", icon: "bi-tree-fill" },
+        { label: "Vías", pct: d.vias, ha: d.ha_vias, color: "#94a3b8", icon: "bi-signpost-split-fill" },
+        { label: "Urbanizada", pct: d.urb, ha: d.ha_urb, color: "#ef4444", icon: "bi-buildings-fill" },
+        { label: "Suelo desc.", pct: d.suelo, ha: d.ha_suelo, color: "#f59e0b", icon: "bi-layers-fill" }
+      ];
+
+      document.getElementById('panelIndicatorsList').innerHTML = gauges.map(g => `
+        <div class="gauge-box">
+          <div class="gauge-top">
+            <span><i class="bi ${g.icon} me-1" style="color: ${g.color};"></i>${g.label}</span>
+            <span class="gauge-ha num">${fmt(g.ha)} ha</span>
+          </div>
+          <div class="gauge-val num" style="color: ${g.color};">${fmt(g.pct)}%</div>
+          <div class="gauge-progress">
+            <div class="gauge-progress-bar" style="width: ${g.pct}%; background: ${g.color};"></div>
+          </div>
+        </div>
+      `).join('');
+
+      actualizarRadarDistrito(d);
+
+      // Si el distrito tiene recortes de verificación, mostrarlos con acceso directo al escáner
+      const muestras = MUESTRAS_VERIFICACION.filter(m => m.distrito === d.nombre);
+      const samplesContainer = document.getElementById('panelSamplesGrid');
+      if (muestras.length > 0) {
+        samplesContainer.innerHTML = `
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${muestras.map(m => `
+              <button type="button" class="btn-action" style="flex: 1; justify-content: center;" onclick="cargarMuestraEnCortinilla('${m.id}')">
+                <i class="bi bi-eye-fill text-success"></i> Ver ${m.corto} en Escáner
+              </button>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        samplesContainer.innerHTML = '';
+      }
+    }
+
+    function actualizarRadarDistrito(d) {
+      const ctx = document.getElementById('districtRadarChart').getContext('2d');
+      const isLight = document.body.classList.contains('light-theme');
+      const gridColor = isLight ? 'rgba(15, 23, 42, 0.1)' : 'rgba(255, 255, 255, 0.12)';
+      const labelColor = isLight ? '#334155' : '#cbd5e1';
+
+      // Promedios de Lima Metropolitana
+      const avgLima = [10.77, 13.12, 67.87, 8.24];
+      const distVals = [d.veg, d.vias, d.urb, d.suelo];
+
+      if (radarChartInstance) {
+        radarChartInstance.data.datasets[0].label = d.nombre;
+        radarChartInstance.data.datasets[0].data = distVals;
+        radarChartInstance.options.scales.r.grid.color = gridColor;
+        radarChartInstance.options.scales.r.angleLines.color = gridColor;
+        radarChartInstance.options.scales.r.pointLabels.color = labelColor;
+        radarChartInstance.update();
+        return;
+      }
+
+      radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['% Vegetación', '% Vías', '% Urbanizada', '% Suelo desc.'],
+          datasets: [
+            {
+              label: d.nombre,
+              data: distVals,
+              backgroundColor: 'rgba(16, 185, 129, 0.25)',
+              borderColor: '#10b981',
+              pointBackgroundColor: '#10b981',
+              borderWidth: 2
+            },
+            {
+              label: 'Promedio Lima',
+              data: avgLima,
+              backgroundColor: 'rgba(148, 163, 184, 0.15)',
+              borderColor: '#94a3b8',
+              pointBackgroundColor: '#94a3b8',
+              borderDash: [4, 4],
+              borderWidth: 1.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              suggestedMax: 85,
+              ticks: { display: false },
+              grid: { color: gridColor },
+              angleLines: { color: gridColor },
+              pointLabels: {
+                color: labelColor,
+                font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ==========================================================================
+    // TABLA INTERACTIVA
+    // ==========================================================================
+    function renderizarTablaDistritos() {
+      const tbody = document.getElementById('districtTableBody');
+      const { col, dir } = estadoOrdenTabla;
+
+      const copia = [...DISTRITOS_DATA].sort((a, b) => {
+        if (col === 'nombre') {
+          return dir === 'asc' ? a.nombre.localeCompare(b.nombre) : b.nombre.localeCompare(a.nombre);
+        }
+        return dir === 'asc' ? a[col] - b[col] : b[col] - a[col];
+      });
+
+      tbody.innerHTML = copia.map(d => `
+        <tr data-row-id="${d.id}" data-name="${d.nombre.toLowerCase()}" class="${distritoSeleccionadoId === d.id ? 'active-row' : ''}" onclick="seleccionarDistrito('${d.id}')" style="cursor: pointer;">
+          <td><strong>${d.nombre}</strong></td>
+          <td class="num">${fmt(d.area)}</td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.veg}%; background: rgba(16, 185, 129, 0.22);"></span>
+              <span class="cell-bar-val" style="color: #10b981;">${fmt(d.veg)}%</span>
+            </div>
+          </td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.vias}%; background: rgba(148, 163, 184, 0.22);"></span>
+              <span class="cell-bar-val">${fmt(d.vias)}%</span>
+            </div>
+          </td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.urb}%; background: rgba(239, 68, 68, 0.22);"></span>
+              <span class="cell-bar-val" style="color: #f87171;">${fmt(d.urb)}%</span>
+            </div>
+          </td>
+          <td class="num">
+            <div class="cell-bar-wrap">
+              <span class="cell-bar-bg" style="width: ${d.suelo}%; background: rgba(245, 158, 11, 0.25);"></span>
+              <span class="cell-bar-val" style="color: #fbbf24;">${fmt(d.suelo)}%</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function ordenarTabla(columna) {
+      if (estadoOrdenTabla.col === columna) {
+        estadoOrdenTabla.dir = estadoOrdenTabla.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        estadoOrdenTabla.col = columna;
+        estadoOrdenTabla.dir = columna === 'nombre' ? 'asc' : 'desc';
+      }
+      renderizarTablaDistritos();
+    }
+
+    // ==========================================================================
+    // CORTINILLA Y CHIPS DE LEYENDA OPENEARTHMAP
+    // ==========================================================================
+    function inicializarVerificacion() {
+      const selector = document.getElementById('sampleSelector');
+      selector.innerHTML = MUESTRAS_VERIFICACION.map((m, i) => `
+        <button type="button" class="${i === 0 ? 'active' : ''}" data-sample="${m.id}" onclick="seleccionarMuestraVerificacion('${m.id}')">
+          ${m.corto}
+        </button>
+      `).join('');
+
+      seleccionarMuestraVerificacion(MUESTRAS_VERIFICACION[0].id);
+
+      const legendGrid = document.getElementById('oemLegendGrid');
+      legendGrid.innerHTML = CLASES_OEM.map(c => `
+        <div class="oem-chip">
+          <span class="oem-swatch" style="background: ${c.hex};"></span>
+          <div>
+            <div style="font-weight: 700; font-size: 0.8rem;">${c.nombre}</div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary);">${c.indicador}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function seleccionarMuestraVerificacion(sampleId) {
+      const muestra = MUESTRAS_VERIFICACION.find(m => m.id === sampleId);
+      if (!muestra) return;
+
+      document.querySelectorAll('#sampleSelector button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sample === sampleId);
+      });
+
+      document.getElementById('curtainImgOrig').src = `${BASE_STATIC}muestras/${sampleId}_orig.jpg`;
+      document.getElementById('curtainImgOver').src = `${BASE_STATIC}muestras/${sampleId}_over.jpg`;
+      document.getElementById('curtainImgMask').src = `${BASE_STATIC}muestras/${sampleId}_mask.jpg`;
+      document.getElementById('sampleCaption').textContent = muestra.titulo;
+    }
+
+    function actualizarCortinilla(valor) {
+      const pct = Number(valor);
+      document.getElementById('curtainImgOver').style.clipPath = `inset(0 0 0 ${pct}%)`;
+      document.getElementById('curtainDivider').style.left = `${pct}%`;
+      document.getElementById('curtainHandle').style.left = `${pct}%`;
+    }
+
+    function cargarMuestraEnCortinilla(sampleId) {
+      seleccionarMuestraVerificacion(sampleId);
+      document.getElementById('panel-verificacion').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Descarga de CSV
+    function descargarCSV(nombreArchivo) {
+      let contenido = '';
+      if (nombreArchivo === 'tabla_porcentajes.csv') {
+        contenido = 'Distrito,Imágenes,Área analizada (ha),% Vegetación,% Vías,% Superficie urbanizada,% Suelo descubierto\n';
+        DISTRITOS_DATA.forEach(d => {
+          contenido += `${d.nombre},20,${d.area.toFixed(2)},${d.veg.toFixed(2)},${d.vias.toFixed(2)},${d.urb.toFixed(2)},${d.suelo.toFixed(2)}\n`;
+        });
+      } else {
+        contenido = 'Distrito,Imágenes,Píxeles totales,Píxeles clasificados,% Vegetación,ha Vegetación,% Vías,ha Vías,% Superficie urbanizada,ha Superficie urbanizada,% Suelo descubierto,ha Suelo descubierto,Área analizada (ha)\n';
+        DISTRITOS_DATA.forEach(d => {
+          contenido += `${d.nombre},20,${d.px_tot},${d.px_clas},${d.veg.toFixed(2)},${d.ha_veg.toFixed(2)},${d.vias.toFixed(2)},${d.ha_vias.toFixed(2)},${d.urb.toFixed(2)},${d.ha_urb.toFixed(2)},${d.suelo.toFixed(2)},${d.ha_suelo.toFixed(2)},${d.area.toFixed(2)}\n`;
+        });
+      }
+
+      const blob = new Blob(["\uFEFF" + contenido], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      animarContadoresKPI();
+      renderizarIouIndicadores();
+      construirFilasDistritosInicial();
+      renderizarTablaDistritos();
+      inicializarVerificacion();
+      seleccionarDistrito('san_isidro');
+    });
+  </script>
+</body>
+</html>
